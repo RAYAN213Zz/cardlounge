@@ -5,19 +5,20 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>CardLounge</title>
 <link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#0f0d0b"/>
+<meta name="theme-color" content="#CC0000"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="CardLounge"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
 <style>
 :root{
+  --red:#CC0000;
+  --red2:#ff1a1a;
   --bg:#0f0d0b;
   --panel:#1a1612;
   --raised:#231e18;
   --line:#332b22;
   --gold:#c9a24b;
-  --gold2:#e8c06a;
   --cyan:#5fd8c9;
   --pink:#d6618f;
   --text:#f0e8dc;
@@ -27,17 +28,19 @@
   --r:16px;
   --sft:env(safe-area-inset-top,0px);
   --sfb:env(safe-area-inset-bottom,0px);
+  --frame-radius:22px;
+  --auto-delay:2.4s;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;overflow:hidden}
+html,body{height:100%;background:#000;color:var(--text);font-family:system-ui,-apple-system,sans-serif;overflow:hidden}
 
 /* ====== VUE SCANNER ====== */
 #vue-scan{
   position:fixed;inset:0;
   display:flex;flex-direction:column;
   background:#000;
+  cursor:pointer;
 }
-
 #video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 
 /* Header flottant */
@@ -45,83 +48,100 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-
   position:relative;z-index:20;
   display:flex;align-items:center;justify-content:space-between;
   padding:calc(var(--sft) + 14px) 18px 12px;
-  background:linear-gradient(to bottom,rgba(0,0,0,.75) 60%,transparent);
+  background:linear-gradient(to bottom,rgba(204,0,0,.90) 60%,transparent);
 }
-.logo{font-size:1.25rem;font-weight:800;color:var(--gold);letter-spacing:.02em}
-.logo span{color:#fff;font-weight:400;font-size:.75rem;opacity:.7;margin-left:6px}
-#btn-settings{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.3rem;cursor:pointer;padding:6px}
+.logo{font-size:1.2rem;font-weight:900;color:#fff;letter-spacing:.04em}
+.logo-dot{
+  display:inline-block;width:16px;height:16px;border-radius:50%;
+  background:#fff;border:2px solid rgba(255,255,255,.5);
+  margin-right:7px;vertical-align:middle;
+}
+#btn-settings{background:none;border:none;color:rgba(255,255,255,.7);font-size:1.3rem;cursor:pointer;padding:6px}
 
-/* Masque SVG */
+/* Masque SVG découpe */
 #svg-mask{position:absolute;inset:0;pointer-events:none;z-index:5}
 
-/* Cadre carte */
+/* Cadre carte — rectangle complet arrondi */
 #frame{
   position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-56%);
-  width:min(68vw,240px);
+  transform:translate(-50%,-57%);
+  width:min(72vw,260px);
   aspect-ratio:63/88;
   z-index:10;
   pointer-events:none;
 }
-/* Coins animés */
-#frame::before,#frame::after,.fc-bl,.fc-br{
-  content:'';position:absolute;
-  width:26px;height:26px;
-  border-color:var(--gold);border-style:solid;
-}
-#frame::before{top:-2px;left:-2px;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
-#frame::after{top:-2px;right:-2px;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
-.fc-bl{bottom:-2px;left:-2px;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
-.fc-br{bottom:-2px;right:-2px;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
 
-/* Ligne de scan animée */
-#scan-line{
-  position:absolute;left:4px;right:4px;height:2px;
-  background:linear-gradient(to right,transparent,var(--gold),transparent);
-  opacity:0;top:0;
+/* Bordure arrondie pleine */
+.frame-border{
+  position:absolute;inset:0;
+  border-radius:var(--frame-radius);
+  border:3px solid #fff;
+  transition:border-color .3s;
+}
+#frame.scanning .frame-border{
+  border-color:var(--red);
+  animation:pulse-border .6s ease-in-out infinite alternate;
+}
+@keyframes pulse-border{
+  from{box-shadow:0 0 0 0 rgba(204,0,0,.4)}
+  to{box-shadow:0 0 0 8px rgba(204,0,0,0)}
+}
+
+/* Barre de progression auto-scan */
+.progress-track{
+  position:absolute;bottom:0;left:0;right:0;
+  height:5px;
+  background:rgba(255,255,255,.2);
+  border-radius:0 0 var(--frame-radius) var(--frame-radius);
+  overflow:hidden;
+}
+.progress-bar{
+  height:100%;width:0%;
+  background:var(--red);
+  border-radius:0 0 var(--frame-radius) var(--frame-radius);
   transition:none;
 }
-#frame.scanning #scan-line{opacity:.8;animation:scanline 1.8s ease-in-out infinite}
-@keyframes scanline{0%{top:4px;opacity:0}10%{opacity:.8}90%{opacity:.8}100%{top:calc(100% - 4px);opacity:0}}
+.progress-bar.running{
+  width:100%;
+  transition:width var(--auto-delay) linear;
+}
 
 /* Label sous le cadre */
 #frame-label{
   position:absolute;top:calc(100% + 14px);left:50%;transform:translateX(-50%);
   white-space:nowrap;
-  font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
-  color:rgba(255,255,255,.65);
-  background:rgba(0,0,0,.4);
-  padding:4px 12px;border-radius:20px;
+  font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.7);
+  background:rgba(0,0,0,.45);
+  padding:5px 14px;border-radius:20px;
 }
 
 /* Contrôles bas */
 #scan-controls{
   position:absolute;bottom:0;left:0;right:0;z-index:20;
-  padding:20px 28px calc(var(--sfb) + 28px);
+  padding:16px 28px calc(var(--sfb) + 22px);
   display:flex;align-items:center;justify-content:space-between;
-  background:linear-gradient(to top,rgba(0,0,0,.8) 60%,transparent);
+  background:linear-gradient(to top,rgba(0,0,0,.85) 60%,transparent);
 }
 
+/* Bouton manuel (plus petit, secondaire) */
 #btn-shutter{
-  width:78px;height:78px;
+  width:64px;height:64px;
   border-radius:50%;
-  background:#fff;
-  border:5px solid rgba(255,255,255,.3);
-  cursor:pointer;
-  position:relative;
-  transition:transform .12s;
+  background:rgba(255,255,255,.18);
+  border:2.5px solid rgba(255,255,255,.35);
+  cursor:pointer;position:relative;
+  transition:transform .12s,background .2s;
+  backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:.62rem;letter-spacing:.05em;font-weight:700;
   flex-shrink:0;
 }
-#btn-shutter:active{transform:scale(.9)}
-#btn-shutter::after{
-  content:'';position:absolute;inset:5px;
-  border-radius:50%;background:#fff;border:2px solid #ddd;
-}
+#btn-shutter:active{transform:scale(.88)}
 #btn-shutter.scanning{
-  background:var(--gold);
-  border-color:rgba(201,162,75,.4);
+  background:rgba(204,0,0,.3);
+  border-color:rgba(204,0,0,.6);
 }
-#btn-shutter.scanning::after{background:var(--gold)}
 
 #btn-flip{
   width:50px;height:50px;border-radius:50%;
@@ -138,7 +158,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-
   display:flex;align-items:center;justify-content:center;
   color:var(--dim);font-size:1.4rem;
 }
-#btn-last.has-photo{border-color:var(--gold)}
+#btn-last.has-photo{border-color:rgba(255,255,255,.4)}
 #btn-last img{width:100%;height:100%;object-fit:cover;display:none}
 #btn-last.has-photo img{display:block}
 
@@ -156,7 +176,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-
 #processing.on{display:block}
 .spinner{
   width:38px;height:38px;border-radius:50%;
-  border:3px solid var(--raised);border-top-color:var(--gold);
+  border:3px solid var(--raised);border-top-color:var(--red);
   animation:spin .7s linear infinite;margin:0 auto 10px;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -164,7 +184,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-
 
 /* Erreur flottante */
 #toast{
-  position:absolute;bottom:calc(var(--sfb) + 120px);left:20px;right:20px;z-index:40;
+  position:absolute;bottom:calc(var(--sfb) + 110px);left:20px;right:20px;z-index:40;
   background:#3a1020;border:1px solid var(--pink);border-radius:12px;
   padding:12px 16px;font-size:.8rem;color:var(--pink);
   text-align:center;display:none;
@@ -183,17 +203,17 @@ canvas{display:none}
 
 #res-header{
   position:sticky;top:0;z-index:10;
-  background:var(--bg);
-  border-bottom:1px solid var(--line);
+  background:var(--red);
   padding:calc(var(--sft) + 10px) 16px 10px;
   display:flex;align-items:center;gap:12px;
 }
 #btn-back{
   background:none;border:none;
-  font-size:1.6rem;color:var(--gold);cursor:pointer;
+  font-size:1.6rem;color:#fff;cursor:pointer;
   line-height:1;padding:4px 8px 4px 0;
 }
-.res-logo{font-size:1.1rem;font-weight:800;color:var(--gold)}
+.res-logo{font-size:1.1rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:7px}
+.res-logo-dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid rgba(255,255,255,.5)}
 
 #res-scroll{
   flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
@@ -203,128 +223,126 @@ canvas{display:none}
 /* Photo + nom côte à côte */
 .card-hero{
   display:flex;gap:14px;align-items:flex-start;
-  margin-bottom:16px;
+  background:#fff;border-radius:16px;padding:14px;
+  margin-bottom:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,.15);
 }
 .card-hero img{
-  width:90px;flex-shrink:0;
-  border-radius:10px;border:1.5px solid var(--line);
+  width:88px;flex-shrink:0;
+  border-radius:10px;border:1.5px solid #eee;
   object-fit:cover;
 }
 .card-hero-info{flex:1;padding-top:2px}
-.card-name{
-  font-size:1.3rem;font-weight:700;
-  line-height:1.2;margin-bottom:4px;
-  color:var(--text);
-}
-.card-name-en{font-size:.82rem;color:var(--dim);margin-bottom:8px}
+.card-name{font-size:1.25rem;font-weight:800;line-height:1.2;margin-bottom:4px;color:#1a1a1a}
+.card-name-en{font-size:.82rem;color:#757575;margin-bottom:8px}
 .conf-badge{
-  display:inline-block;font-size:.6rem;
+  display:inline-block;font-size:.6rem;font-weight:800;
   padding:2px 8px;border-radius:10px;letter-spacing:.06em;
   margin-bottom:8px;
 }
-.conf-high{background:rgba(76,175,136,.15);color:var(--green)}
-.conf-med{background:rgba(232,150,74,.15);color:var(--orange)}
-.conf-low{background:rgba(214,97,143,.15);color:var(--pink)}
+.conf-high{background:rgba(46,125,50,.12);color:#2E7D32}
+.conf-med{background:rgba(230,81,0,.12);color:#E65100}
+.conf-low{background:rgba(204,0,0,.12);color:var(--red)}
 
 .pills{display:flex;flex-wrap:wrap;gap:6px}
 .pill{
-  font-size:.64rem;padding:3px 8px;
-  background:var(--raised);border-radius:6px;color:var(--dim);
+  font-size:.64rem;padding:3px 9px;
+  background:#F5F5F5;border-radius:6px;color:#757575;
+  border:1px solid #E0E0E0;
 }
+.pill-grade{background:#FFF8E1;border-color:#FFE082;color:#795548}
+
+.etat-note{font-size:.78rem;color:#E65100;margin-top:8px;font-weight:600}
 
 /* Section */
 .section{
-  background:var(--panel);border:1px solid var(--line);
-  border-radius:var(--r);padding:16px;margin-bottom:12px;
+  background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;
+  box-shadow:0 1px 8px rgba(0,0,0,.07);
 }
 .section-title{
   font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;
-  color:var(--dim);margin-bottom:12px;
+  color:var(--red);font-weight:800;margin-bottom:12px;
   display:flex;justify-content:space-between;align-items:center;
 }
-.link-ext{color:var(--cyan);text-decoration:none;font-size:.64rem}
+.link-ext{color:#1565C0;text-decoration:none;font-size:.64rem;font-weight:600}
 
 /* Grille prix */
-.prix-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
-}
+.prix-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .prix-cell{
-  background:var(--raised);border-radius:10px;
+  background:#F5F5F5;border-radius:10px;border:1px solid #E0E0E0;
   padding:10px 4px 8px;text-align:center;
 }
-.prix-code{font-size:.58rem;letter-spacing:.1em;margin-bottom:5px}
-.prix-val{font-size:.9rem;font-weight:700;color:var(--text)}
-.prix-val.na{color:#c0392b;opacity:.45}
-.etat-MT .prix-code,.etat-NM .prix-code{color:var(--green)}
-.etat-EX .prix-code,.etat-GD .prix-code{color:var(--cyan)}
-.etat-LP .prix-code,.etat-PL .prix-code{color:var(--orange)}
-.etat-PO .prix-code{color:var(--pink)}
+.prix-code{font-size:.58rem;letter-spacing:.1em;margin-bottom:5px;font-weight:800}
+.prix-val{font-size:.9rem;font-weight:700;color:#1A1A1A}
+.prix-val.na{color:#BDBDBD}
+.etat-MT .prix-code,.etat-NM .prix-code{color:#2E7D32}
+.etat-EX .prix-code,.etat-GD .prix-code{color:#1565C0}
+.etat-LP .prix-code,.etat-PL .prix-code{color:#E65100}
+.etat-PO .prix-code{color:var(--red)}
 
-.loading-prix{font-size:.72rem;color:var(--dim);font-style:italic}
+.loading-prix{font-size:.72rem;color:#BDBDBD;font-style:italic}
 
 /* eBay stats */
 .ebay-stats{display:flex;gap:18px;margin-bottom:12px;flex-wrap:wrap}
-.ebay-stat .lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:2px}
-.ebay-stat .val{font-size:1rem;font-weight:700;color:var(--gold)}
+.ebay-stat .lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:#757575;margin-bottom:2px;font-weight:700}
+.ebay-stat .val{font-size:1rem;font-weight:800;color:#1A1A1A}
 
 .sale-list{list-style:none}
 .sale{
   display:flex;align-items:baseline;gap:8px;
-  padding:7px 0;border-bottom:1px solid var(--line);
+  padding:7px 0;border-bottom:1px solid #F0F0F0;
   font-size:.78rem;
 }
 .sale:last-child{border:none}
-.sale-price{font-weight:700;color:var(--gold);white-space:nowrap;min-width:52px}
-.sale-title{color:var(--dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sale-price{font-weight:800;color:var(--red);white-space:nowrap;min-width:52px}
+.sale-title{color:#757575;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sale-title a{color:inherit;text-decoration:none}
-.sale-date{font-size:.62rem;color:var(--dim);white-space:nowrap}
+.sale-date{font-size:.62rem;color:#BDBDBD;white-space:nowrap}
 
-/* Remarques état */
-.etat-note{font-size:.78rem;color:var(--orange);margin-top:8px}
+/* Nouveau scan btn */
+.btn-new-scan{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;margin-top:16px;
+  background:#fff;border:2px solid var(--red);border-radius:14px;
+  padding:15px;font-size:.95rem;font-weight:800;
+  color:var(--red);cursor:pointer;
+  transition:opacity .15s;
+}
+.btn-new-scan:active{opacity:.75}
 
 /* ====== VUE SETTINGS ====== */
-#vue-settings{
-  position:fixed;inset:0;display:none;flex-direction:column;
-  background:var(--bg);
-}
+#vue-settings{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
 #vue-settings.on{display:flex}
 
 #set-header{
   padding:calc(var(--sft) + 12px) 16px 12px;
-  border-bottom:1px solid var(--line);
+  background:var(--red);
   display:flex;align-items:center;gap:12px;
 }
-#btn-set-back{background:none;border:none;font-size:1.6rem;color:var(--gold);cursor:pointer;padding:4px 8px 4px 0}
+#btn-set-back{background:none;border:none;font-size:1.6rem;color:#fff;cursor:pointer;padding:4px 8px 4px 0}
+.set-logo{font-size:1.1rem;font-weight:900;color:#fff}
 
 #set-body{padding:24px 16px}
-
-.set-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:8px}
+.set-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:8px;font-weight:700}
 .set-input{
   width:100%;background:var(--panel);border:1.5px solid var(--line);
   border-radius:10px;padding:13px 14px;color:var(--text);
-  font-size:.9rem;outline:none;
-  transition:border-color .2s;
+  font-size:.9rem;outline:none;transition:border-color .2s;
 }
-.set-input:focus{border-color:var(--gold)}
+.set-input:focus{border-color:var(--red)}
 .set-hint{font-size:.72rem;color:var(--dim);margin-top:8px;line-height:1.5}
 .set-hint a{color:var(--cyan)}
 .set-save{
   width:100%;margin-top:20px;
-  background:var(--gold);border:none;border-radius:12px;
-  padding:15px;font-size:.95rem;font-weight:700;
-  color:var(--bg);cursor:pointer;
-  transition:opacity .15s;
+  background:var(--red);border:none;border-radius:12px;
+  padding:15px;font-size:.95rem;font-weight:800;
+  color:#fff;cursor:pointer;transition:opacity .15s;
 }
 .set-save:active{opacity:.8}
-.set-ok{
-  text-align:center;margin-top:12px;font-size:.78rem;
-  color:var(--green);display:none;
-}
+.set-ok{text-align:center;margin-top:12px;font-size:.78rem;color:var(--green);display:none}
 .set-ok.on{display:block}
-
 .ngrok-box{
-  background:var(--raised);border-radius:12px;
-  padding:14px;margin-top:20px;
+  background:var(--raised);border-radius:12px;padding:14px;margin-top:20px;
   font-size:.78rem;color:var(--dim);line-height:1.7;
 }
 .ngrok-box strong{color:var(--text)}
@@ -341,32 +359,36 @@ canvas{display:none}
 <div id="vue-scan">
   <video id="video" autoplay playsinline muted></video>
 
+  <!-- SVG découpe du cadre -->
   <svg id="svg-mask" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <mask id="m">
         <rect width="100%" height="100%" fill="white"/>
-        <rect id="hole" rx="14" ry="14" fill="black"/>
+        <rect id="hole" rx="22" ry="22" fill="black"/>
       </mask>
     </defs>
-    <rect width="100%" height="100%" fill="rgba(0,0,0,.6)" mask="url(#m)"/>
+    <rect width="100%" height="100%" fill="rgba(0,0,0,.62)" mask="url(#m)"/>
   </svg>
 
+  <!-- Cadre arrondi -->
   <div id="frame">
-    <span class="fc-bl"></span><span class="fc-br"></span>
-    <div id="scan-line"></div>
-    <div id="frame-label">Cadre la carte ici</div>
+    <div class="frame-border"></div>
+    <div class="progress-track">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div id="frame-label">Place la carte · scan auto</div>
   </div>
 
+  <!-- Header -->
   <div id="scan-header">
-    <div>
-      <div class="logo">CardLounge <span>Scanner</span></div>
-    </div>
+    <div class="logo"><span class="logo-dot"></span>CardLounge</div>
     <button id="btn-settings" title="Paramètres">⚙️</button>
   </div>
 
+  <!-- Contrôles bas -->
   <div id="scan-controls">
     <button id="btn-flip">🔄</button>
-    <button id="btn-shutter"></button>
+    <button id="btn-shutter">SCAN</button>
     <button id="btn-last"><img id="last-thumb" src="" alt=""/></button>
   </div>
 
@@ -382,9 +404,9 @@ canvas{display:none}
 <div id="vue-results">
   <div id="res-header">
     <button id="btn-back">←</button>
-    <div class="res-logo">CardLounge</div>
+    <div class="res-logo"><span class="res-logo-dot"></span>CardLounge</div>
   </div>
-  <div id="res-scroll" id="res-scroll">
+  <div id="res-scroll">
     <div id="res-content"></div>
   </div>
 </div>
@@ -393,7 +415,7 @@ canvas{display:none}
 <div id="vue-settings">
   <div id="set-header">
     <button id="btn-set-back">←</button>
-    <div class="res-logo">Paramètres</div>
+    <div class="set-logo">Paramètres</div>
   </div>
   <div id="set-body">
     <div class="set-label">URL du serveur</div>
@@ -406,15 +428,13 @@ canvas{display:none}
     </div>
     <button class="set-save" id="btn-save-url">Enregistrer</button>
     <div class="set-ok" id="set-ok">✓ URL enregistrée</div>
-
     <div class="ngrok-box">
-      <strong>Comment obtenir l'URL ngrok</strong>
-      <br>1. Lance le serveur :
+      <strong>Comment obtenir l'URL ngrok</strong><br>
+      1. Lance le serveur :
       <code>uvicorn app:app --host 0.0.0.0 --port 8000</code>
       2. Lance ngrok :
       <code>ngrok http 8000</code>
-      3. Copie l'URL <strong>https://…ngrok-free.app</strong>
-      <br>et colle-la ci-dessus.
+      3. Copie l'URL <strong>https://…ngrok-free.app</strong> et colle-la ci-dessus.
     </div>
   </div>
 </div>
@@ -426,39 +446,83 @@ canvas{display:none}
 const LS_KEY = 'cl_server';
 function getServer(){ return localStorage.getItem(LS_KEY) || ''; }
 function setServer(u){ localStorage.setItem(LS_KEY, u.replace(/\/+$/,'')); }
+const AUTO_DELAY_MS = 2400;
 
 // ---- Éléments ----
-const video     = document.getElementById('video');
-const canvas    = document.getElementById('canvas');
-const frame     = document.getElementById('frame');
-const hole      = document.getElementById('hole');
-const scanLine  = document.getElementById('scan-line');
-const btnShut   = document.getElementById('btn-shutter');
-const btnFlip   = document.getElementById('btn-flip');
-const btnLast   = document.getElementById('btn-last');
-const lastThumb = document.getElementById('last-thumb');
-const proc      = document.getElementById('processing');
-const procMsg   = document.getElementById('proc-msg');
-const toast     = document.getElementById('toast');
+const video      = document.getElementById('video');
+const canvas     = document.getElementById('canvas');
+const frame      = document.getElementById('frame');
+const hole       = document.getElementById('hole');
+const progressBar= document.getElementById('progress-bar');
+const frameLabel = document.getElementById('frame-label');
+const btnShut    = document.getElementById('btn-shutter');
+const btnFlip    = document.getElementById('btn-flip');
+const btnLast    = document.getElementById('btn-last');
+const lastThumb  = document.getElementById('last-thumb');
+const proc       = document.getElementById('processing');
+const procMsg    = document.getElementById('proc-msg');
+const toast      = document.getElementById('toast');
 
-const vueScan   = document.getElementById('vue-scan');
-const vueRes    = document.getElementById('vue-results');
-const vueSet    = document.getElementById('vue-settings');
+const vueScan    = document.getElementById('vue-scan');
+const vueRes     = document.getElementById('vue-results');
+const vueSet     = document.getElementById('vue-settings');
 
-const btnBack   = document.getElementById('btn-back');
-const btnSetOpen= document.getElementById('btn-settings');
-const btnSetBack= document.getElementById('btn-set-back');
-const btnSaveUrl= document.getElementById('btn-save-url');
-const setUrlInp = document.getElementById('set-url');
-const setOk     = document.getElementById('set-ok');
-const resContent= document.getElementById('res-content');
+const btnBack    = document.getElementById('btn-back');
+const btnSetOpen = document.getElementById('btn-settings');
+const btnSetBack = document.getElementById('btn-set-back');
+const btnSaveUrl = document.getElementById('btn-save-url');
+const setUrlInp  = document.getElementById('set-url');
+const setOk      = document.getElementById('set-ok');
+const resContent = document.getElementById('res-content');
 
 const ETATS = ['MT','NM','EX','GD','LP','PL','PO'];
 
+// ---- Auto-scan ----
+let autoTimer = null;
+let isScanning = false;
+
+function startAutoScan(){
+  if(isScanning) return;
+  clearTimeout(autoTimer);
+  progressBar.classList.remove('running');
+  // Force reflow pour relancer l'animation CSS
+  void progressBar.offsetWidth;
+  progressBar.classList.add('running');
+  frameLabel.textContent = 'Place la carte · scan auto';
+  autoTimer = setTimeout(()=>{
+    if(!isScanning) capture();
+  }, AUTO_DELAY_MS);
+}
+
+function stopAutoScan(){
+  clearTimeout(autoTimer);
+  progressBar.classList.remove('running');
+  progressBar.style.transition = 'none';
+  progressBar.style.width = '0%';
+  setTimeout(()=>{ progressBar.style.transition = ''; }, 50);
+}
+
 // ---- Navigation ----
-function showScan(){ vueScan.style.display=''; vueRes.classList.remove('on'); vueSet.classList.remove('on'); }
-function showResults(){ vueScan.style.display='none'; vueRes.classList.add('on'); vueSet.classList.remove('on'); }
-function showSettings(){ vueScan.style.display='none'; vueSet.classList.add('on'); vueRes.classList.remove('on'); }
+function showScan(){
+  vueScan.style.display='';
+  vueRes.classList.remove('on');
+  vueSet.classList.remove('on');
+  reset();
+  // Petit délai pour laisser la caméra reprendre
+  setTimeout(startAutoScan, 500);
+}
+function showResults(){
+  vueScan.style.display='none';
+  vueRes.classList.add('on');
+  vueSet.classList.remove('on');
+  stopAutoScan();
+}
+function showSettings(){
+  vueScan.style.display='none';
+  vueSet.classList.add('on');
+  vueRes.classList.remove('on');
+  stopAutoScan();
+}
 
 btnBack.addEventListener('click', showScan);
 btnSetOpen.addEventListener('click',()=>{ setUrlInp.value=getServer(); setOk.classList.remove('on'); showSettings(); });
@@ -466,9 +530,19 @@ btnSetBack.addEventListener('click', showScan);
 btnSaveUrl.addEventListener('click',()=>{
   setServer(setUrlInp.value.trim());
   setOk.classList.add('on');
-  setTimeout(()=>{ setOk.classList.remove('on'); showScan(); },1000);
+  setTimeout(()=>{ setOk.classList.remove('on'); showScan(); }, 1000);
 });
 btnLast.addEventListener('click', showResults);
+
+// Tap sur le fond du scanner → scan immédiat
+vueScan.addEventListener('click', (e)=>{
+  const ignore = ['btn-settings','btn-flip','btn-shutter','btn-last'];
+  if(ignore.some(id=>e.target.closest('#'+id))) return;
+  if(!isScanning) capture();
+});
+
+// Bouton manuel
+btnShut.addEventListener('click', (e)=>{ e.stopPropagation(); if(!isScanning) capture(); });
 
 // ---- Caméra ----
 let facingMode = 'environment';
@@ -482,7 +556,7 @@ async function startCamera(){
       audio:false
     });
     video.srcObject = stream;
-    video.addEventListener('loadedmetadata', syncMask, {once:true});
+    video.addEventListener('loadedmetadata', ()=>{ syncMask(); startAutoScan(); }, {once:true});
   } catch(e){
     showToast('Caméra inaccessible — vérifie les permissions');
   }
@@ -497,32 +571,33 @@ function syncMask(){
 }
 
 window.addEventListener('resize', syncMask);
-setTimeout(syncMask, 400);
 
-btnFlip.addEventListener('click',()=>{
+btnFlip.addEventListener('click', (e)=>{
+  e.stopPropagation();
   facingMode = facingMode==='environment' ? 'user' : 'environment';
+  stopAutoScan();
   startCamera();
 });
 
 // ---- Capture ----
 let lastPhotoBlob = null;
-let lastPhotoUrl = null;
-
-btnShut.addEventListener('click', capture);
+let lastPhotoUrl  = null;
 
 function capture(){
-  if(btnShut.classList.contains('scanning')) return;
+  if(isScanning) return;
+  isScanning = true;
+  stopAutoScan();
 
-  // Flash
+  // Flash blanc
   const fl = document.createElement('div');
-  fl.style.cssText='position:fixed;inset:0;background:#fff;opacity:.65;z-index:99;pointer-events:none;transition:opacity .25s';
+  fl.style.cssText='position:fixed;inset:0;background:#fff;opacity:.6;z-index:99;pointer-events:none;transition:opacity .2s';
   document.body.appendChild(fl);
-  setTimeout(()=>{ fl.style.opacity=0; setTimeout(()=>fl.remove(),250); },30);
+  setTimeout(()=>{ fl.style.opacity=0; setTimeout(()=>fl.remove(),200); }, 30);
 
-  const r = frame.getBoundingClientRect();
-  const sw = window.innerWidth, sh = window.innerHeight;
-  const vw = video.videoWidth, vh = video.videoHeight;
-  const sx = r.left/sw*vw, sy = r.top/sh*vh;
+  const r   = frame.getBoundingClientRect();
+  const sw  = window.innerWidth, sh = window.innerHeight;
+  const vw  = video.videoWidth,  vh = video.videoHeight;
+  const sx  = r.left/sw*vw, sy = r.top/sh*vh;
   const sw2 = r.width/sw*vw, sh2 = r.height/sh*vh;
 
   canvas.width = sw2; canvas.height = sh2;
@@ -541,13 +616,11 @@ function capture(){
 // ---- Scan SSE ----
 async function scan(){
   const server = getServer();
-  if(!server){
-    showSettings();
-    return;
-  }
+  if(!server){ isScanning=false; showSettings(); return; }
 
   btnShut.classList.add('scanning');
   frame.classList.add('scanning');
+  frameLabel.textContent = '⏳ Analyse en cours…';
   proc.classList.add('on');
   procMsg.textContent = 'Identification de la carte…';
   toast.classList.remove('on');
@@ -562,7 +635,7 @@ async function scan(){
 
     const reader = rep.body.getReader();
     const dec = new TextDecoder();
-    let buf='';
+    let buf = '';
 
     while(true){
       const {value,done} = await reader.read();
@@ -574,14 +647,14 @@ async function scan(){
         const em = bloc.match(/^event: (.+)$/m);
         const dm = bloc.match(/^data: (.+)$/m);
         if(!em||!dm) continue;
-        const evt=em[1].trim();
+        const evt = em[1].trim();
         let d; try{d=JSON.parse(dm[1])}catch{continue}
 
         if(evt==='scan'){
           if(d.erreur){ showToast(d.erreur); reset(); return; }
           renderCard(d);
           showResults();
-          procMsg.textContent='Chargement des prix…';
+          procMsg.textContent = 'Chargement des prix…';
           proc.classList.add('on');
         } else if(evt==='prices'){
           renderPrix(d);
@@ -604,6 +677,7 @@ async function scan(){
 }
 
 function reset(full=true){
+  isScanning = false;
   btnShut.classList.remove('scanning');
   frame.classList.remove('scanning');
   if(full) proc.classList.remove('on');
@@ -612,22 +686,23 @@ function reset(full=true){
 // ---- Rendu carte ----
 function renderCard(d){
   const conf = typeof d.confiance==='number' ? d.confiance : null;
-  const cls = conf==null?'':conf>=85?'conf-high':conf>=60?'conf-med':'conf-low';
+  const cls  = conf==null?'':conf>=85?'conf-high':conf>=60?'conf-med':'conf-low';
   const pills = [
     d.numero&&`N° ${esc(d.numero)}`,
     d.langue_detectee&&esc(d.langue_detectee.toUpperCase()),
     d.set_visible&&esc(d.set_visible),
-    d.gradation_visible&&esc(d.gradation_visible),
   ].filter(Boolean).map(t=>`<span class="pill">${t}</span>`).join('');
+  const gradeHtml = d.gradation_visible
+    ? `<span class="pill pill-grade">${esc(d.gradation_visible)}</span>` : '';
 
   resContent.innerHTML = `
     <div class="card-hero">
-      <img src="${esc(lastPhotoUrl)}" alt="Carte"/>
+      <img src="${esc(lastPhotoUrl)}" alt="Carte" style="aspect-ratio:63/88"/>
       <div class="card-hero-info">
         <div class="card-name">${esc(d.nom_carte_langue_originale||'Inconnu')}</div>
         ${d.nom_carte_anglais?`<div class="card-name-en">${esc(d.nom_carte_anglais)}</div>`:''}
         ${conf!=null?`<span class="conf-badge ${cls}">Confiance ${conf}%</span>`:''}
-        <div class="pills">${pills}</div>
+        <div class="pills">${pills}${gradeHtml}</div>
         ${d.remarques_etat?`<div class="etat-note">⚠ ${esc(d.remarques_etat)}</div>`:''}
       </div>
     </div>
@@ -636,8 +711,9 @@ function renderCard(d){
         <span>Cardmarket</span>
         <a class="link-ext" id="lien-cm" href="#" target="_blank" style="display:none">Voir la fiche →</a>
       </div>
-      <div id="zone-prix"><div class="loading-prix">Chargement…</div></div>
+      <div id="zone-prix"><div class="loading-prix">Chargement des prix…</div></div>
     </div>
+    <button class="btn-new-scan" onclick="showScan()">📷 Nouveau scan</button>
   `;
 }
 
@@ -689,7 +765,7 @@ function showToast(msg){ toast.textContent=msg; toast.classList.add('on'); setTi
 function esc(s){ if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ---- Init ----
-if(!getServer()) setTimeout(showSettings, 500);
+if(!getServer()) setTimeout(showSettings, 600);
 startCamera();
 </script>
 
