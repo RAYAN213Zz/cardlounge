@@ -501,6 +501,8 @@ function clearBatch(){
   batchItems.forEach(i=>{ try{ URL.revokeObjectURL(i.url); }catch{} });
   batchItems=[];
   batchSelections=[];
+  _batchQueue=[];
+  _batchRunning=false;
   batchThumbs.innerHTML='';
   batchStrip.classList.remove('on');
   bvNum.textContent='0';
@@ -583,10 +585,31 @@ function capture(){
   },'image/jpeg',0.85);
 }
 
-// ======= SCAN ARRIÈRE-PLAN (batch) =======
-async function scanEnArrierePlan(idx){
+// ======= SCAN ARRIÈRE-PLAN (batch) — file d'attente séquentielle =======
+// Le serveur ne supporte qu'1 scan Cardmarket à la fois (verrou Playwright).
+// On traite les cartes une par une pour éviter les échecs.
+let _batchQueue = [];      // indices à traiter
+let _batchRunning = false; // est-ce qu'on est en train de traiter ?
+
+function scanEnArrierePlan(idx){
+  _batchQueue.push(idx);
+  _processBatchQueue();
+}
+
+async function _processBatchQueue(){
+  if(_batchRunning || _batchQueue.length===0) return;
+  _batchRunning = true;
+
+  while(_batchQueue.length > 0){
+    const idx = _batchQueue.shift();
+    await _scanOne(idx);
+  }
+  _batchRunning = false;
+}
+
+async function _scanOne(idx){
   const server=getServer();
-  if(!server) return;
+  if(!server){ batchItems[idx].status='error'; updateThumbStatus(idx); return; }
   const item=batchItems[idx];
   const fd=new FormData();
   fd.append('recto',item.blob,'recto.jpg');
