@@ -5,20 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>CardLounge</title>
 <link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#CC0000"/>
+<meta name="theme-color" content="#0f0d0b"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="CardLounge"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
 <style>
 :root{
-  --red:#CC0000;
-  --red2:#ff1a1a;
   --bg:#0f0d0b;
   --panel:#1a1612;
   --raised:#231e18;
   --line:#332b22;
   --gold:#c9a24b;
+  --gold2:#e8c06a;
   --cyan:#5fd8c9;
   --pink:#d6618f;
   --text:#f0e8dc;
@@ -28,120 +27,148 @@
   --r:16px;
   --sft:env(safe-area-inset-top,0px);
   --sfb:env(safe-area-inset-bottom,0px);
-  --frame-radius:22px;
-  --auto-delay:2.4s;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:#000;color:var(--text);font-family:system-ui,-apple-system,sans-serif;overflow:hidden}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;overflow:hidden}
 
 /* ====== VUE SCANNER ====== */
-#vue-scan{
-  position:fixed;inset:0;
-  display:flex;flex-direction:column;
-  background:#000;
-  cursor:pointer;
-}
+#vue-scan{position:fixed;inset:0;display:flex;flex-direction:column;background:#000}
 #video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 
-/* Header flottant */
+/* Header */
 #scan-header{
   position:relative;z-index:20;
   display:flex;align-items:center;justify-content:space-between;
   padding:calc(var(--sft) + 14px) 18px 12px;
-  background:linear-gradient(to bottom,rgba(204,0,0,.90) 60%,transparent);
+  background:linear-gradient(to bottom,rgba(0,0,0,.75) 60%,transparent);
 }
-.logo{font-size:1.2rem;font-weight:900;color:#fff;letter-spacing:.04em}
-.logo-dot{
-  display:inline-block;width:16px;height:16px;border-radius:50%;
-  background:#fff;border:2px solid rgba(255,255,255,.5);
-  margin-right:7px;vertical-align:middle;
-}
-#btn-settings{background:none;border:none;color:rgba(255,255,255,.7);font-size:1.3rem;cursor:pointer;padding:6px}
+.logo{font-size:1.25rem;font-weight:800;color:var(--gold);letter-spacing:.02em}
+.logo span{color:#fff;font-weight:400;font-size:.75rem;opacity:.7;margin-left:6px}
+#btn-settings{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.3rem;cursor:pointer;padding:6px}
 
-/* Masque SVG découpe */
+/* SVG masque */
 #svg-mask{position:absolute;inset:0;pointer-events:none;z-index:5}
 
-/* Cadre carte — rectangle complet arrondi */
+/* Cadre carte */
 #frame{
   position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-57%);
-  width:min(72vw,260px);
+  transform:translate(-50%,-56%);
+  width:min(68vw,240px);
   aspect-ratio:63/88;
-  z-index:10;
-  pointer-events:none;
+  z-index:10;pointer-events:none;
 }
+#frame::before,#frame::after,.fc-bl,.fc-br{
+  content:'';position:absolute;
+  width:28px;height:28px;
+  border-color:var(--gold);border-style:solid;
+}
+#frame::before{top:-2px;left:-2px;border-width:3px 0 0 3px;border-radius:6px 0 0 0}
+#frame::after{top:-2px;right:-2px;border-width:3px 3px 0 0;border-radius:0 6px 0 0}
+.fc-bl{bottom:-2px;left:-2px;border-width:0 0 3px 3px;border-radius:0 0 0 6px}
+.fc-br{bottom:-2px;right:-2px;border-width:0 3px 3px 0;border-radius:0 0 6px 0}
 
-/* Bordure arrondie pleine */
-.frame-border{
-  position:absolute;inset:0;
-  border-radius:var(--frame-radius);
-  border:3px solid #fff;
-  transition:border-color .3s;
+/* Ligne de scan animée */
+#scan-line{
+  position:absolute;left:4px;right:4px;height:2px;
+  background:linear-gradient(to right,transparent,var(--gold),transparent);
+  opacity:0;top:0;
 }
-#frame.scanning .frame-border{
-  border-color:var(--red);
-  animation:pulse-border .6s ease-in-out infinite alternate;
-}
-@keyframes pulse-border{
-  from{box-shadow:0 0 0 0 rgba(204,0,0,.4)}
-  to{box-shadow:0 0 0 8px rgba(204,0,0,0)}
-}
-
-/* Barre de progression auto-scan */
-.progress-track{
-  position:absolute;bottom:0;left:0;right:0;
-  height:5px;
-  background:rgba(255,255,255,.2);
-  border-radius:0 0 var(--frame-radius) var(--frame-radius);
-  overflow:hidden;
-}
-.progress-bar{
-  height:100%;width:0%;
-  background:var(--red);
-  border-radius:0 0 var(--frame-radius) var(--frame-radius);
-  transition:none;
-}
-.progress-bar.running{
-  width:100%;
-  transition:width var(--auto-delay) linear;
-}
+#frame.scanning #scan-line{opacity:.8;animation:scanline 1.8s ease-in-out infinite}
+@keyframes scanline{0%{top:4px;opacity:0}10%{opacity:.8}90%{opacity:.8}100%{top:calc(100% - 4px);opacity:0}}
 
 /* Label sous le cadre */
 #frame-label{
   position:absolute;top:calc(100% + 14px);left:50%;transform:translateX(-50%);
   white-space:nowrap;
-  font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;
-  color:rgba(255,255,255,.7);
-  background:rgba(0,0,0,.45);
-  padding:5px 14px;border-radius:20px;
+  font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.65);
+  background:rgba(0,0,0,.4);
+  padding:4px 12px;border-radius:20px;
+}
+
+/* === BATCH : bande thumbnails === */
+#batch-strip{
+  position:absolute;bottom:130px;left:0;right:0;z-index:25;
+  display:none;
+  padding:0 12px;
+}
+#batch-strip.on{display:block}
+#batch-thumbs{
+  display:flex;gap:6px;overflow-x:auto;
+  padding:6px 0;
+  scrollbar-width:none;
+}
+#batch-thumbs::-webkit-scrollbar{display:none}
+.bthumb{
+  flex-shrink:0;width:42px;height:59px;
+  border-radius:5px;object-fit:cover;
+  border:2px solid var(--gold);
+  position:relative;cursor:pointer;
+  opacity:.85;transition:opacity .15s;
+}
+.bthumb:hover{opacity:1}
+.bthumb-del{
+  position:absolute;top:-5px;right:-5px;
+  width:16px;height:16px;border-radius:50%;
+  background:#c0392b;color:#fff;
+  font-size:9px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border:1.5px solid #000;
 }
 
 /* Contrôles bas */
 #scan-controls{
   position:absolute;bottom:0;left:0;right:0;z-index:20;
-  padding:16px 28px calc(var(--sfb) + 22px);
+  padding:20px 28px calc(var(--sfb) + 28px);
   display:flex;align-items:center;justify-content:space-between;
-  background:linear-gradient(to top,rgba(0,0,0,.85) 60%,transparent);
+  background:linear-gradient(to top,rgba(0,0,0,.8) 60%,transparent);
 }
 
-/* Bouton manuel (plus petit, secondaire) */
+/* Bouton shutter */
 #btn-shutter{
-  width:64px;height:64px;
-  border-radius:50%;
-  background:rgba(255,255,255,.18);
-  border:2.5px solid rgba(255,255,255,.35);
+  width:78px;height:78px;border-radius:50%;
+  background:#fff;border:5px solid rgba(255,255,255,.3);
   cursor:pointer;position:relative;
-  transition:transform .12s,background .2s;
-  backdrop-filter:blur(8px);
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:.62rem;letter-spacing:.05em;font-weight:700;
-  flex-shrink:0;
+  transition:transform .12s;flex-shrink:0;
 }
-#btn-shutter:active{transform:scale(.88)}
-#btn-shutter.scanning{
-  background:rgba(204,0,0,.3);
-  border-color:rgba(204,0,0,.6);
+#btn-shutter:active{transform:scale(.9)}
+#btn-shutter::after{
+  content:'';position:absolute;inset:5px;
+  border-radius:50%;background:#fff;border:2px solid #ddd;
 }
+#btn-shutter.scanning{background:var(--gold);border-color:rgba(201,162,75,.4)}
+#btn-shutter.scanning::after{background:var(--gold)}
+
+/* Bouton OK batch */
+#btn-batch-ok{
+  width:78px;height:78px;border-radius:50%;
+  background:var(--gold);border:5px solid rgba(201,162,75,.3);
+  cursor:pointer;display:none;
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:2px;flex-shrink:0;
+  transition:transform .12s;
+}
+#btn-batch-ok:active{transform:scale(.9)}
+#btn-batch-ok.on{display:flex}
+.bok-label{font-size:.58rem;font-weight:800;color:var(--bg);letter-spacing:.06em;text-transform:uppercase}
+.bok-count{font-size:1.1rem;font-weight:900;color:var(--bg);line-height:1}
+
+/* Toggle mode batch */
+#btn-mode{
+  width:50px;height:50px;border-radius:14px;
+  background:rgba(255,255,255,.1);backdrop-filter:blur(8px);
+  border:1.5px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.7);font-size:.62rem;font-weight:700;
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;
+  letter-spacing:.04em;text-transform:uppercase;
+  transition:background .2s,border-color .2s,color .2s;
+}
+#btn-mode.batch-on{
+  background:rgba(201,162,75,.2);
+  border-color:var(--gold);color:var(--gold);
+}
+.mode-icon{font-size:1.1rem}
 
 #btn-flip{
   width:50px;height:50px;border-radius:50%;
@@ -158,11 +185,11 @@ html,body{height:100%;background:#000;color:var(--text);font-family:system-ui,-a
   display:flex;align-items:center;justify-content:center;
   color:var(--dim);font-size:1.4rem;
 }
-#btn-last.has-photo{border-color:rgba(255,255,255,.4)}
+#btn-last.has-photo{border-color:var(--gold)}
 #btn-last img{width:100%;height:100%;object-fit:cover;display:none}
 #btn-last.has-photo img{display:block}
 
-/* Badge de traitement */
+/* Badge traitement */
 #processing{
   position:absolute;top:50%;left:50%;
   transform:translate(-50%,-50%);
@@ -170,187 +197,127 @@ html,body{height:100%;background:#000;color:var(--text);font-family:system-ui,-a
   background:rgba(15,13,11,.92);
   border:1px solid var(--line);
   border-radius:20px;padding:22px 30px;
-  text-align:center;backdrop-filter:blur(12px);
-  min-width:180px;
+  text-align:center;backdrop-filter:blur(12px);min-width:180px;
 }
 #processing.on{display:block}
 .spinner{
   width:38px;height:38px;border-radius:50%;
-  border:3px solid var(--raised);border-top-color:var(--red);
+  border:3px solid var(--raised);border-top-color:var(--gold);
   animation:spin .7s linear infinite;margin:0 auto 10px;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 #proc-msg{font-size:.72rem;letter-spacing:.06em;color:var(--dim)}
 
-/* Erreur flottante */
+/* Toast erreur */
 #toast{
-  position:absolute;bottom:calc(var(--sfb) + 110px);left:20px;right:20px;z-index:40;
+  position:absolute;bottom:calc(var(--sfb) + 120px);left:20px;right:20px;z-index:40;
   background:#3a1020;border:1px solid var(--pink);border-radius:12px;
   padding:12px 16px;font-size:.8rem;color:var(--pink);
   text-align:center;display:none;
 }
 #toast.on{display:block}
-
 canvas{display:none}
 
 /* ====== VUE RÉSULTATS ====== */
-#vue-results{
-  position:fixed;inset:0;
-  display:none;flex-direction:column;
-  background:var(--bg);
-}
+#vue-results{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
 #vue-results.on{display:flex}
 
 #res-header{
   position:sticky;top:0;z-index:10;
-  background:var(--red);
+  background:var(--bg);border-bottom:1px solid var(--line);
   padding:calc(var(--sft) + 10px) 16px 10px;
   display:flex;align-items:center;gap:12px;
 }
-#btn-back{
-  background:none;border:none;
-  font-size:1.6rem;color:#fff;cursor:pointer;
-  line-height:1;padding:4px 8px 4px 0;
-}
-.res-logo{font-size:1.1rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:7px}
-.res-logo-dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid rgba(255,255,255,.5)}
+#btn-back{background:none;border:none;font-size:1.6rem;color:var(--gold);cursor:pointer;line-height:1;padding:4px 8px 4px 0}
+.res-logo{font-size:1.1rem;font-weight:800;color:var(--gold)}
+#res-count{font-size:.72rem;color:var(--dim);margin-left:auto}
 
-#res-scroll{
-  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:16px 16px calc(var(--sfb) + 24px);
-}
+#res-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(var(--sfb) + 24px)}
 
-/* Photo + nom côte à côte */
-.card-hero{
-  display:flex;gap:14px;align-items:flex-start;
-  background:#fff;border-radius:16px;padding:14px;
-  margin-bottom:12px;
-  box-shadow:0 2px 12px rgba(0,0,0,.15);
-}
-.card-hero img{
-  width:88px;flex-shrink:0;
-  border-radius:10px;border:1.5px solid #eee;
-  object-fit:cover;
-}
+/* Card résultat */
+.card-hero{display:flex;gap:14px;align-items:flex-start;margin-bottom:8px}
+.card-hero img{width:90px;flex-shrink:0;border-radius:10px;border:1.5px solid var(--line);object-fit:cover;aspect-ratio:63/88}
 .card-hero-info{flex:1;padding-top:2px}
-.card-name{font-size:1.25rem;font-weight:800;line-height:1.2;margin-bottom:4px;color:#1a1a1a}
-.card-name-en{font-size:.82rem;color:#757575;margin-bottom:8px}
-.conf-badge{
-  display:inline-block;font-size:.6rem;font-weight:800;
-  padding:2px 8px;border-radius:10px;letter-spacing:.06em;
-  margin-bottom:8px;
-}
-.conf-high{background:rgba(46,125,50,.12);color:#2E7D32}
-.conf-med{background:rgba(230,81,0,.12);color:#E65100}
-.conf-low{background:rgba(204,0,0,.12);color:var(--red)}
-
+.card-name{font-size:1.3rem;font-weight:700;line-height:1.2;margin-bottom:4px;color:var(--text)}
+.card-name-en{font-size:.82rem;color:var(--dim);margin-bottom:8px}
+.conf-badge{display:inline-block;font-size:.6rem;padding:2px 8px;border-radius:10px;letter-spacing:.06em;margin-bottom:8px}
+.conf-high{background:rgba(76,175,136,.15);color:var(--green)}
+.conf-med{background:rgba(232,150,74,.15);color:var(--orange)}
+.conf-low{background:rgba(214,97,143,.15);color:var(--pink)}
 .pills{display:flex;flex-wrap:wrap;gap:6px}
-.pill{
-  font-size:.64rem;padding:3px 9px;
-  background:#F5F5F5;border-radius:6px;color:#757575;
-  border:1px solid #E0E0E0;
-}
-.pill-grade{background:#FFF8E1;border-color:#FFE082;color:#795548}
+.pill{font-size:.64rem;padding:3px 8px;background:var(--raised);border-radius:6px;color:var(--dim)}
+.pill-grade{background:rgba(201,162,75,.15);color:var(--gold);border:1px solid rgba(201,162,75,.3)}
+.etat-note{font-size:.78rem;color:var(--orange);margin-top:8px}
 
-.etat-note{font-size:.78rem;color:#E65100;margin-top:8px;font-weight:600}
+/* Section prix */
+.section{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.section-title{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.link-ext{color:var(--cyan);text-decoration:none;font-size:.64rem}
 
-/* Section */
-.section{
-  background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;
-  box-shadow:0 1px 8px rgba(0,0,0,.07);
+/* Séparateur batch */
+.batch-sep{
+  display:flex;align-items:center;gap:10px;margin:20px 0 14px;
 }
-.section-title{
-  font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;
-  color:var(--red);font-weight:800;margin-bottom:12px;
-  display:flex;justify-content:space-between;align-items:center;
+.batch-sep-line{flex:1;height:1px;background:var(--line)}
+.batch-sep-txt{font-size:.62rem;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.batch-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--gold);color:var(--bg);
+  font-size:.62rem;font-weight:900;margin-right:4px;
 }
-.link-ext{color:#1565C0;text-decoration:none;font-size:.64rem;font-weight:600}
 
-/* Grille prix */
 .prix-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.prix-cell{
-  background:#F5F5F5;border-radius:10px;border:1px solid #E0E0E0;
-  padding:10px 4px 8px;text-align:center;
-}
-.prix-code{font-size:.58rem;letter-spacing:.1em;margin-bottom:5px;font-weight:800}
-.prix-val{font-size:.9rem;font-weight:700;color:#1A1A1A}
-.prix-val.na{color:#BDBDBD}
-.etat-MT .prix-code,.etat-NM .prix-code{color:#2E7D32}
-.etat-EX .prix-code,.etat-GD .prix-code{color:#1565C0}
-.etat-LP .prix-code,.etat-PL .prix-code{color:#E65100}
-.etat-PO .prix-code{color:var(--red)}
+.prix-cell{background:var(--raised);border-radius:10px;padding:10px 4px 8px;text-align:center}
+.prix-code{font-size:.58rem;letter-spacing:.1em;margin-bottom:5px}
+.prix-val{font-size:.9rem;font-weight:700;color:var(--text)}
+.prix-val.na{color:#c0392b;opacity:.45}
+.etat-MT .prix-code,.etat-NM .prix-code{color:var(--green)}
+.etat-EX .prix-code,.etat-GD .prix-code{color:var(--cyan)}
+.etat-LP .prix-code,.etat-PL .prix-code{color:var(--orange)}
+.etat-PO .prix-code{color:var(--pink)}
+.loading-prix{font-size:.72rem;color:var(--dim);font-style:italic}
 
-.loading-prix{font-size:.72rem;color:#BDBDBD;font-style:italic}
-
-/* eBay stats */
 .ebay-stats{display:flex;gap:18px;margin-bottom:12px;flex-wrap:wrap}
-.ebay-stat .lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:#757575;margin-bottom:2px;font-weight:700}
-.ebay-stat .val{font-size:1rem;font-weight:800;color:#1A1A1A}
-
+.ebay-stat .lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:2px}
+.ebay-stat .val{font-size:1rem;font-weight:700;color:var(--gold)}
 .sale-list{list-style:none}
-.sale{
-  display:flex;align-items:baseline;gap:8px;
-  padding:7px 0;border-bottom:1px solid #F0F0F0;
-  font-size:.78rem;
-}
+.sale{display:flex;align-items:baseline;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.78rem}
 .sale:last-child{border:none}
-.sale-price{font-weight:800;color:var(--red);white-space:nowrap;min-width:52px}
-.sale-title{color:#757575;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sale-price{font-weight:700;color:var(--gold);white-space:nowrap;min-width:52px}
+.sale-title{color:var(--dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sale-title a{color:inherit;text-decoration:none}
-.sale-date{font-size:.62rem;color:#BDBDBD;white-space:nowrap}
+.sale-date{font-size:.62rem;color:var(--dim);white-space:nowrap}
+.etat-note-res{font-size:.78rem;color:var(--orange);margin-top:8px}
 
-/* Nouveau scan btn */
+/* Btn nouveau scan */
 .btn-new-scan{
-  display:flex;align-items:center;justify-content:center;gap:8px;
   width:100%;margin-top:16px;
-  background:#fff;border:2px solid var(--red);border-radius:14px;
-  padding:15px;font-size:.95rem;font-weight:800;
-  color:var(--red);cursor:pointer;
-  transition:opacity .15s;
+  background:transparent;border:1.5px solid var(--gold);
+  border-radius:14px;padding:15px;font-size:.95rem;font-weight:700;
+  color:var(--gold);cursor:pointer;letter-spacing:.04em;
+  transition:background .15s;
 }
-.btn-new-scan:active{opacity:.75}
+.btn-new-scan:active{background:rgba(201,162,75,.1)}
 
 /* ====== VUE SETTINGS ====== */
 #vue-settings{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
 #vue-settings.on{display:flex}
-
-#set-header{
-  padding:calc(var(--sft) + 12px) 16px 12px;
-  background:var(--red);
-  display:flex;align-items:center;gap:12px;
-}
-#btn-set-back{background:none;border:none;font-size:1.6rem;color:#fff;cursor:pointer;padding:4px 8px 4px 0}
-.set-logo{font-size:1.1rem;font-weight:900;color:#fff}
-
+#set-header{padding:calc(var(--sft) + 12px) 16px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+#btn-set-back{background:none;border:none;font-size:1.6rem;color:var(--gold);cursor:pointer;padding:4px 8px 4px 0}
 #set-body{padding:24px 16px}
-.set-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:8px;font-weight:700}
-.set-input{
-  width:100%;background:var(--panel);border:1.5px solid var(--line);
-  border-radius:10px;padding:13px 14px;color:var(--text);
-  font-size:.9rem;outline:none;transition:border-color .2s;
-}
-.set-input:focus{border-color:var(--red)}
+.set-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:8px}
+.set-input{width:100%;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:13px 14px;color:var(--text);font-size:.9rem;outline:none;transition:border-color .2s}
+.set-input:focus{border-color:var(--gold)}
 .set-hint{font-size:.72rem;color:var(--dim);margin-top:8px;line-height:1.5}
 .set-hint a{color:var(--cyan)}
-.set-save{
-  width:100%;margin-top:20px;
-  background:var(--red);border:none;border-radius:12px;
-  padding:15px;font-size:.95rem;font-weight:800;
-  color:#fff;cursor:pointer;transition:opacity .15s;
-}
+.set-save{width:100%;margin-top:20px;background:var(--gold);border:none;border-radius:12px;padding:15px;font-size:.95rem;font-weight:700;color:var(--bg);cursor:pointer;transition:opacity .15s}
 .set-save:active{opacity:.8}
 .set-ok{text-align:center;margin-top:12px;font-size:.78rem;color:var(--green);display:none}
 .set-ok.on{display:block}
-.ngrok-box{
-  background:var(--raised);border-radius:12px;padding:14px;margin-top:20px;
-  font-size:.78rem;color:var(--dim);line-height:1.7;
-}
+.ngrok-box{background:var(--raised);border-radius:12px;padding:14px;margin-top:20px;font-size:.78rem;color:var(--dim);line-height:1.7}
 .ngrok-box strong{color:var(--text)}
-.ngrok-box code{
-  display:block;background:var(--bg);border-radius:8px;
-  padding:8px 12px;margin:6px 0;font-size:.75rem;
-  color:var(--gold);letter-spacing:.03em;
-}
+.ngrok-box code{display:block;background:var(--bg);border-radius:8px;padding:8px 12px;margin:6px 0;font-size:.75rem;color:var(--gold);letter-spacing:.03em}
 </style>
 </head>
 <body>
@@ -359,37 +326,37 @@ canvas{display:none}
 <div id="vue-scan">
   <video id="video" autoplay playsinline muted></video>
 
-  <!-- SVG découpe du cadre -->
   <svg id="svg-mask" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <mask id="m">
         <rect width="100%" height="100%" fill="white"/>
-        <rect id="hole" rx="22" ry="22" fill="black"/>
+        <rect id="hole" rx="14" ry="14" fill="black"/>
       </mask>
     </defs>
-    <rect width="100%" height="100%" fill="rgba(0,0,0,.62)" mask="url(#m)"/>
+    <rect width="100%" height="100%" fill="rgba(0,0,0,.6)" mask="url(#m)"/>
   </svg>
 
-  <!-- Cadre arrondi -->
   <div id="frame">
-    <div class="frame-border"></div>
-    <div class="progress-track">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
-    <div id="frame-label">Place la carte · scan auto</div>
+    <span class="fc-bl"></span><span class="fc-br"></span>
+    <div id="scan-line"></div>
+    <div id="frame-label">Cadre la carte ici</div>
   </div>
 
-  <!-- Header -->
   <div id="scan-header">
-    <div class="logo"><span class="logo-dot"></span>CardLounge</div>
-    <button id="btn-settings" title="Paramètres">⚙️</button>
+    <div class="logo">CardLounge <span>Scanner</span></div>
+    <button id="btn-settings">⚙️</button>
   </div>
 
-  <!-- Contrôles bas -->
+  <!-- Bande thumbnails batch -->
+  <div id="batch-strip">
+    <div id="batch-thumbs"></div>
+  </div>
+
   <div id="scan-controls">
+    <button id="btn-mode" title="Mode batch"><span class="mode-icon">📚</span><span style="font-size:.55rem">Batch</span></button>
+    <button id="btn-shutter"></button>
+    <button id="btn-batch-ok"><span class="bok-count" id="bok-count">0</span><span class="bok-label">Scanner</span></button>
     <button id="btn-flip">🔄</button>
-    <button id="btn-shutter">SCAN</button>
-    <button id="btn-last"><img id="last-thumb" src="" alt=""/></button>
   </div>
 
   <div id="processing">
@@ -404,7 +371,8 @@ canvas{display:none}
 <div id="vue-results">
   <div id="res-header">
     <button id="btn-back">←</button>
-    <div class="res-logo"><span class="res-logo-dot"></span>CardLounge</div>
+    <div class="res-logo">CardLounge</div>
+    <span id="res-count"></span>
   </div>
   <div id="res-scroll">
     <div id="res-content"></div>
@@ -415,7 +383,7 @@ canvas{display:none}
 <div id="vue-settings">
   <div id="set-header">
     <button id="btn-set-back">←</button>
-    <div class="set-logo">Paramètres</div>
+    <div class="res-logo">Paramètres</div>
   </div>
   <div id="set-body">
     <div class="set-label">URL du serveur</div>
@@ -429,12 +397,13 @@ canvas{display:none}
     <button class="set-save" id="btn-save-url">Enregistrer</button>
     <div class="set-ok" id="set-ok">✓ URL enregistrée</div>
     <div class="ngrok-box">
-      <strong>Comment obtenir l'URL ngrok</strong><br>
-      1. Lance le serveur :
+      <strong>Comment obtenir l'URL ngrok</strong>
+      <br>1. Lance le serveur :
       <code>uvicorn app:app --host 0.0.0.0 --port 8000</code>
       2. Lance ngrok :
       <code>ngrok http 8000</code>
-      3. Copie l'URL <strong>https://…ngrok-free.app</strong> et colle-la ci-dessus.
+      3. Copie l'URL <strong>https://…ngrok-free.app</strong>
+      <br>et colle-la ci-dessus.
     </div>
   </div>
 </div>
@@ -444,29 +413,29 @@ canvas{display:none}
 <script>
 // ---- Config ----
 const LS_KEY = 'cl_server';
-function getServer(){ return localStorage.getItem(LS_KEY) || ''; }
+function getServer(){ return localStorage.getItem(LS_KEY)||''; }
 function setServer(u){ localStorage.setItem(LS_KEY, u.replace(/\/+$/,'')); }
-const AUTO_DELAY_MS = 2400;
 
 // ---- Éléments ----
 const video      = document.getElementById('video');
 const canvas     = document.getElementById('canvas');
 const frame      = document.getElementById('frame');
 const hole       = document.getElementById('hole');
-const progressBar= document.getElementById('progress-bar');
+const scanLine   = document.getElementById('scan-line');
 const frameLabel = document.getElementById('frame-label');
 const btnShut    = document.getElementById('btn-shutter');
 const btnFlip    = document.getElementById('btn-flip');
-const btnLast    = document.getElementById('btn-last');
-const lastThumb  = document.getElementById('last-thumb');
+const btnMode    = document.getElementById('btn-mode');
+const btnBatchOk = document.getElementById('btn-batch-ok');
+const bokCount   = document.getElementById('bok-count');
+const batchStrip = document.getElementById('batch-strip');
+const batchThumbs= document.getElementById('batch-thumbs');
 const proc       = document.getElementById('processing');
 const procMsg    = document.getElementById('proc-msg');
 const toast      = document.getElementById('toast');
-
 const vueScan    = document.getElementById('vue-scan');
 const vueRes     = document.getElementById('vue-results');
 const vueSet     = document.getElementById('vue-settings');
-
 const btnBack    = document.getElementById('btn-back');
 const btnSetOpen = document.getElementById('btn-settings');
 const btnSetBack = document.getElementById('btn-set-back');
@@ -474,54 +443,100 @@ const btnSaveUrl = document.getElementById('btn-save-url');
 const setUrlInp  = document.getElementById('set-url');
 const setOk      = document.getElementById('set-ok');
 const resContent = document.getElementById('res-content');
+const resCount   = document.getElementById('res-count');
 
 const ETATS = ['MT','NM','EX','GD','LP','PL','PO'];
 
-// ---- Auto-scan ----
-let autoTimer = null;
-let isScanning = false;
+// ---- Mode batch ----
+let batchMode = false;
+// [{blob, url}]
+let batchQueue = [];
 
-function startAutoScan(){
-  if(isScanning) return;
-  clearTimeout(autoTimer);
-  progressBar.classList.remove('running');
-  // Force reflow pour relancer l'animation CSS
-  void progressBar.offsetWidth;
-  progressBar.classList.add('running');
-  frameLabel.textContent = 'Place la carte · scan auto';
-  autoTimer = setTimeout(()=>{
-    if(!isScanning) capture();
-  }, AUTO_DELAY_MS);
+function setBatchMode(on){
+  batchMode = on;
+  btnMode.classList.toggle('batch-on', on);
+  if(!on){
+    clearBatch();
+  } else {
+    frameLabel.textContent = 'Prends tes cartes une par une';
+    batchStrip.classList.add('on');
+  }
 }
 
-function stopAutoScan(){
-  clearTimeout(autoTimer);
-  progressBar.classList.remove('running');
-  progressBar.style.transition = 'none';
-  progressBar.style.width = '0%';
-  setTimeout(()=>{ progressBar.style.transition = ''; }, 50);
+function clearBatch(){
+  batchQueue.forEach(i=>URL.revokeObjectURL(i.url));
+  batchQueue = [];
+  batchThumbs.innerHTML = '';
+  batchStrip.classList.remove('on');
+  bokCount.textContent = '0';
+  btnBatchOk.classList.remove('on');
+  frameLabel.textContent = 'Cadre la carte ici';
 }
+
+function updateBatchUI(){
+  bokCount.textContent = batchQueue.length;
+  if(batchQueue.length > 0){
+    btnBatchOk.classList.add('on');
+    btnShut.style.display = 'none';
+  } else {
+    btnBatchOk.classList.remove('on');
+    btnShut.style.display = '';
+  }
+}
+
+function addBatchThumb(item, idx){
+  const wrap = document.createElement('div');
+  wrap.style.position='relative';wrap.style.flexShrink='0';
+
+  const img = document.createElement('img');
+  img.src = item.url;
+  img.className = 'bthumb';
+  img.title = `Carte ${idx+1}`;
+
+  const del = document.createElement('div');
+  del.className = 'bthumb-del';
+  del.textContent = '×';
+  del.onclick = (e)=>{
+    e.stopPropagation();
+    URL.revokeObjectURL(item.url);
+    batchQueue.splice(idx, 1);
+    renderBatchThumbs();
+    updateBatchUI();
+  };
+
+  wrap.appendChild(img);
+  wrap.appendChild(del);
+  return wrap;
+}
+
+function renderBatchThumbs(){
+  batchThumbs.innerHTML = '';
+  batchQueue.forEach((item, i)=>{
+    batchThumbs.appendChild(addBatchThumb(item, i));
+  });
+  // Scroll au dernier
+  batchThumbs.scrollLeft = batchThumbs.scrollWidth;
+}
+
+btnMode.addEventListener('click',()=> setBatchMode(!batchMode));
+btnBatchOk.addEventListener('click', lancerBatch);
 
 // ---- Navigation ----
 function showScan(){
   vueScan.style.display='';
   vueRes.classList.remove('on');
   vueSet.classList.remove('on');
-  reset();
-  // Petit délai pour laisser la caméra reprendre
-  setTimeout(startAutoScan, 500);
+  resetUI();
 }
 function showResults(){
   vueScan.style.display='none';
   vueRes.classList.add('on');
   vueSet.classList.remove('on');
-  stopAutoScan();
 }
 function showSettings(){
   vueScan.style.display='none';
   vueSet.classList.add('on');
   vueRes.classList.remove('on');
-  stopAutoScan();
 }
 
 btnBack.addEventListener('click', showScan);
@@ -532,21 +547,12 @@ btnSaveUrl.addEventListener('click',()=>{
   setOk.classList.add('on');
   setTimeout(()=>{ setOk.classList.remove('on'); showScan(); }, 1000);
 });
-btnLast.addEventListener('click', showResults);
-
-// Tap sur le fond du scanner → scan immédiat
-vueScan.addEventListener('click', (e)=>{
-  const ignore = ['btn-settings','btn-flip','btn-shutter','btn-last'];
-  if(ignore.some(id=>e.target.closest('#'+id))) return;
-  if(!isScanning) capture();
-});
-
-// Bouton manuel
-btnShut.addEventListener('click', (e)=>{ e.stopPropagation(); if(!isScanning) capture(); });
 
 // ---- Caméra ----
 let facingMode = 'environment';
 let stream = null;
+let lastPhotoBlob = null;
+let lastPhotoUrl  = null;
 
 async function startCamera(){
   if(stream) stream.getTracks().forEach(t=>t.stop());
@@ -556,7 +562,7 @@ async function startCamera(){
       audio:false
     });
     video.srcObject = stream;
-    video.addEventListener('loadedmetadata', ()=>{ syncMask(); startAutoScan(); }, {once:true});
+    video.addEventListener('loadedmetadata', syncMask, {once:true});
   } catch(e){
     showToast('Caméra inaccessible — vérifie les permissions');
   }
@@ -569,30 +575,25 @@ function syncMask(){
   hole.setAttribute('width', r.width);
   hole.setAttribute('height', r.height);
 }
-
 window.addEventListener('resize', syncMask);
+setTimeout(syncMask, 400);
 
-btnFlip.addEventListener('click', (e)=>{
-  e.stopPropagation();
-  facingMode = facingMode==='environment' ? 'user' : 'environment';
-  stopAutoScan();
+btnFlip.addEventListener('click',()=>{
+  facingMode = facingMode==='environment'?'user':'environment';
   startCamera();
 });
 
 // ---- Capture ----
-let lastPhotoBlob = null;
-let lastPhotoUrl  = null;
+btnShut.addEventListener('click', capture);
 
 function capture(){
-  if(isScanning) return;
-  isScanning = true;
-  stopAutoScan();
+  if(btnShut.classList.contains('scanning')) return;
 
-  // Flash blanc
+  // Flash
   const fl = document.createElement('div');
-  fl.style.cssText='position:fixed;inset:0;background:#fff;opacity:.6;z-index:99;pointer-events:none;transition:opacity .2s';
+  fl.style.cssText='position:fixed;inset:0;background:#fff;opacity:.6;z-index:99;pointer-events:none;transition:opacity .22s';
   document.body.appendChild(fl);
-  setTimeout(()=>{ fl.style.opacity=0; setTimeout(()=>fl.remove(),200); }, 30);
+  setTimeout(()=>{ fl.style.opacity=0; setTimeout(()=>fl.remove(),220); }, 30);
 
   const r   = frame.getBoundingClientRect();
   const sw  = window.innerWidth, sh = window.innerHeight;
@@ -603,31 +604,39 @@ function capture(){
   canvas.width = sw2; canvas.height = sh2;
   canvas.getContext('2d').drawImage(video, sx, sy, sw2, sh2, 0, 0, sw2, sh2);
 
+  // Compression légère pour accélérer l'upload (qualité 0.82)
   canvas.toBlob(blob=>{
-    lastPhotoBlob = blob;
-    if(lastPhotoUrl) URL.revokeObjectURL(lastPhotoUrl);
-    lastPhotoUrl = URL.createObjectURL(blob);
-    lastThumb.src = lastPhotoUrl;
-    btnLast.classList.add('has-photo');
-    scan();
-  }, 'image/jpeg', 0.9);
+    if(batchMode){
+      const url = URL.createObjectURL(blob);
+      batchQueue.push({blob, url});
+      renderBatchThumbs();
+      updateBatchUI();
+      // Feedback vibration si dispo
+      navigator.vibrate && navigator.vibrate(40);
+    } else {
+      lastPhotoBlob = blob;
+      if(lastPhotoUrl) URL.revokeObjectURL(lastPhotoUrl);
+      lastPhotoUrl = URL.createObjectURL(blob);
+      scanSingle(blob, lastPhotoUrl);
+    }
+  }, 'image/jpeg', 0.82);
 }
 
-// ---- Scan SSE ----
-async function scan(){
+// ---- Scan unique ----
+async function scanSingle(blob, photoUrl){
   const server = getServer();
-  if(!server){ isScanning=false; showSettings(); return; }
+  if(!server){ showSettings(); return; }
 
   btnShut.classList.add('scanning');
   frame.classList.add('scanning');
-  frameLabel.textContent = '⏳ Analyse en cours…';
   proc.classList.add('on');
   procMsg.textContent = 'Identification de la carte…';
   toast.classList.remove('on');
   resContent.innerHTML = '';
+  resCount.textContent = '';
 
   const fd = new FormData();
-  fd.append('recto', lastPhotoBlob, 'recto.jpg');
+  fd.append('recto', blob, 'recto.jpg');
 
   try{
     const rep = await fetch(server+'/api/scan-stream', {method:'POST', body:fd});
@@ -647,57 +656,158 @@ async function scan(){
         const em = bloc.match(/^event: (.+)$/m);
         const dm = bloc.match(/^data: (.+)$/m);
         if(!em||!dm) continue;
-        const evt = em[1].trim();
+        const evt=em[1].trim();
         let d; try{d=JSON.parse(dm[1])}catch{continue}
 
         if(evt==='scan'){
-          if(d.erreur){ showToast(d.erreur); reset(); return; }
-          renderCard(d);
+          if(d.erreur){ showToast(d.erreur); resetUI(); return; }
+          renderCard(d, photoUrl, resContent);
           showResults();
-          procMsg.textContent = 'Chargement des prix…';
+          procMsg.textContent='Chargement des prix…';
           proc.classList.add('on');
         } else if(evt==='prices'){
-          renderPrix(d);
+          renderPrix(d, document.getElementById('zone-prix-0'));
           proc.classList.remove('on');
         } else if(evt==='ebay'){
-          renderEbay(d);
+          renderEbay(d, document.getElementById('s-prix-0'));
         } else if(evt==='error'){
-          showToast(d.erreur||'Erreur inconnue');
-          reset();
+          showToast(d.erreur||'Erreur inconnue'); resetUI();
         } else if(evt==='done'){
-          proc.classList.remove('on');
-          reset(false);
+          proc.classList.remove('on'); resetUI(false);
         }
       }
     }
   } catch(e){
     showToast('Serveur injoignable — vérifie l\'URL dans ⚙️');
-    reset();
+    resetUI();
   }
 }
 
-function reset(full=true){
-  isScanning = false;
+// ---- Batch scan (cartes en séquence) ----
+async function lancerBatch(){
+  if(batchQueue.length === 0) return;
+  const server = getServer();
+  if(!server){ showSettings(); return; }
+
+  const items = [...batchQueue];
+  const total = items.length;
+
+  // Préparer la vue résultats
+  resContent.innerHTML = '';
+  resCount.textContent = `0 / ${total}`;
+  showResults();
+  proc.classList.add('on');
+  procMsg.textContent = `Carte 1 / ${total}…`;
+
+  // Conteneurs pré-créés pour chaque carte
+  const containers = items.map((_, i)=>{
+    const sep = document.createElement('div');
+    sep.className = 'batch-sep';
+    sep.innerHTML = `<div class="batch-sep-line"></div>
+      <span class="batch-sep-txt"><span class="batch-num">${i+1}</span>Carte ${i+1}</span>
+      <div class="batch-sep-line"></div>`;
+
+    const zone = document.createElement('div');
+    zone.id = `batch-zone-${i}`;
+    zone.innerHTML = `<div class="section" style="opacity:.4;text-align:center;padding:20px"><div class="loading-prix">En attente…</div></div>`;
+
+    if(i > 0) resContent.appendChild(sep);
+    resContent.appendChild(zone);
+    return zone;
+  });
+
+  // Scanner chaque carte en séquence (le serveur ne supporte qu'1 à la fois avec le verrou CM)
+  let done = 0;
+  for(let i=0; i<items.length; i++){
+    const {blob, url} = items[i];
+    const zone = containers[i];
+    zone.innerHTML = '';
+    procMsg.textContent = `Carte ${i+1} / ${total}…`;
+
+    await new Promise(resolve=>{
+      const fd = new FormData();
+      fd.append('recto', blob, 'recto.jpg');
+
+      fetch(server+'/api/scan-stream', {method:'POST', body:fd})
+        .then(rep=>{ if(!rep.ok) throw new Error('Erreur '+rep.status); return rep; })
+        .then(rep=>{
+          const reader = rep.body.getReader();
+          const dec = new TextDecoder();
+          let buf='';
+          let cardRendered = false;
+
+          async function pump(){
+            while(true){
+              const {value,done2} = await reader.read().then(r=>({value:r.value,done2:r.done}));
+              if(done2) break;
+              buf += dec.decode(value,{stream:true});
+              const blocs = buf.split('\n\n');
+              buf = blocs.pop();
+              for(const bloc of blocs){
+                const em=bloc.match(/^event: (.+)$/m);
+                const dm=bloc.match(/^data: (.+)$/m);
+                if(!em||!dm) continue;
+                const evt=em[1].trim();
+                let d; try{d=JSON.parse(dm[1])}catch{continue}
+
+                if(evt==='scan'){
+                  if(d.erreur){
+                    zone.innerHTML=`<div class="section"><div class="loading-prix">⚠ ${esc(d.erreur)}</div></div>`;
+                  } else {
+                    zone.innerHTML='';
+                    renderCard(d, url, zone, i);
+                    cardRendered=true;
+                  }
+                } else if(evt==='prices'){
+                  renderPrix(d, document.getElementById(`zone-prix-${i}`));
+                } else if(evt==='ebay'){
+                  renderEbay(d, document.getElementById(`s-prix-${i}`));
+                } else if(evt==='done'||evt==='error'){
+                  done++;
+                  resCount.textContent=`${done} / ${total}`;
+                  resolve();
+                  return;
+                }
+              }
+            }
+            resolve();
+          }
+          pump();
+        })
+        .catch(e=>{
+          zone.innerHTML=`<div class="section"><div class="loading-prix">⚠ ${esc(e.message)}</div></div>`;
+          done++; resCount.textContent=`${done} / ${total}`;
+          resolve();
+        });
+    });
+  }
+
+  proc.classList.remove('on');
+  resCount.textContent = `${total} carte${total>1?'s':''} ✓`;
+  clearBatch();
+  setBatchMode(false);
+}
+
+function resetUI(full=true){
   btnShut.classList.remove('scanning');
   frame.classList.remove('scanning');
   if(full) proc.classList.remove('on');
 }
 
-// ---- Rendu carte ----
-function renderCard(d){
-  const conf = typeof d.confiance==='number' ? d.confiance : null;
-  const cls  = conf==null?'':conf>=85?'conf-high':conf>=60?'conf-med':'conf-low';
-  const pills = [
+// ---- Rendu ----
+function renderCard(d, photoUrl, container, idx=0){
+  const conf=typeof d.confiance==='number'?d.confiance:null;
+  const cls=conf==null?'':conf>=85?'conf-high':conf>=60?'conf-med':'conf-low';
+  const pills=[
     d.numero&&`N° ${esc(d.numero)}`,
     d.langue_detectee&&esc(d.langue_detectee.toUpperCase()),
     d.set_visible&&esc(d.set_visible),
   ].filter(Boolean).map(t=>`<span class="pill">${t}</span>`).join('');
-  const gradeHtml = d.gradation_visible
-    ? `<span class="pill pill-grade">${esc(d.gradation_visible)}</span>` : '';
+  const gradeHtml=d.gradation_visible?`<span class="pill pill-grade">${esc(d.gradation_visible)}</span>`:'';
 
-  resContent.innerHTML = `
+  container.innerHTML=`
     <div class="card-hero">
-      <img src="${esc(lastPhotoUrl)}" alt="Carte" style="aspect-ratio:63/88"/>
+      <img src="${esc(photoUrl)}" alt="Carte"/>
       <div class="card-hero-info">
         <div class="card-name">${esc(d.nom_carte_langue_originale||'Inconnu')}</div>
         ${d.nom_carte_anglais?`<div class="card-name-en">${esc(d.nom_carte_anglais)}</div>`:''}
@@ -706,71 +816,69 @@ function renderCard(d){
         ${d.remarques_etat?`<div class="etat-note">⚠ ${esc(d.remarques_etat)}</div>`:''}
       </div>
     </div>
-    <div class="section" id="s-prix">
+    <div class="section" id="s-prix-${idx}">
       <div class="section-title">
         <span>Cardmarket</span>
-        <a class="link-ext" id="lien-cm" href="#" target="_blank" style="display:none">Voir la fiche →</a>
+        <a class="link-ext" id="lien-cm-${idx}" href="#" target="_blank" style="display:none">Voir →</a>
       </div>
-      <div id="zone-prix"><div class="loading-prix">Chargement des prix…</div></div>
+      <div id="zone-prix-${idx}"><div class="loading-prix">Chargement…</div></div>
     </div>
-    <button class="btn-new-scan" onclick="showScan()">📷 Nouveau scan</button>
   `;
+
+  // Bouton nouveau scan seulement sur la dernière (mode solo)
+  if(idx===0 && !batchMode){
+    const btn=document.createElement('button');
+    btn.className='btn-new-scan';
+    btn.textContent='📷 Nouveau scan';
+    btn.onclick=showScan;
+    container.appendChild(btn);
+  }
 }
 
-function renderPrix(cm){
-  const z = document.getElementById('zone-prix');
-  const l = document.getElementById('lien-cm');
-  if(!z) return;
-  if(cm.erreur){ z.innerHTML=`<div class="loading-prix">⚠ ${esc(cm.erreur)}</div>`; return; }
+function renderPrix(cm, zone){
+  if(!zone) return;
+  const lIdx=zone.id.replace('zone-prix-','');
+  const l=document.getElementById('lien-cm-'+lIdx);
+  if(cm.erreur){ zone.innerHTML=`<div class="loading-prix">⚠ ${esc(cm.erreur)}</div>`; return; }
   if(cm.url_produit&&l){ l.href=cm.url_produit; l.style.display=''; }
-  const prix = cm.prix_par_etat||{};
-  z.innerHTML = `<div class="prix-grid">${ETATS.map(e=>{
+  const prix=cm.prix_par_etat||{};
+  zone.innerHTML=`<div class="prix-grid">${ETATS.map(e=>{
     const v=prix[e];
-    return `<div class="prix-cell etat-${e}">
-      <div class="prix-code">${e}</div>
-      ${v!=null?`<div class="prix-val">${v.toFixed(2)}€</div>`:`<div class="prix-val na">—</div>`}
-    </div>`;
+    return `<div class="prix-cell etat-${e}"><div class="prix-code">${e}</div>${v!=null?`<div class="prix-val">${v.toFixed(2)}€</div>`:`<div class="prix-val na">—</div>`}</div>`;
   }).join('')}</div>`;
 }
 
-function renderEbay(eb){
-  if(!eb||eb.erreur||!eb.ventes?.length) return;
-  const s = document.getElementById('s-prix');
-  if(!s) return;
-  const dev = eb.devise||'';
-  const html = `
-    <div class="section" id="s-ebay">
-      <div class="section-title">
-        <span>Ventes eBay récentes</span>
-        ${eb.url_recherche?`<a class="link-ext" href="${esc(eb.url_recherche)}" target="_blank">Voir →</a>`:''}
-      </div>
-      <div class="ebay-stats">
-        ${eb.mediane!=null?`<div class="ebay-stat"><div class="lbl">Médiane</div><div class="val">${eb.mediane.toFixed(2)} ${dev}</div></div>`:''}
-        ${eb.moyenne!=null?`<div class="ebay-stat"><div class="lbl">Moyenne</div><div class="val">${eb.moyenne.toFixed(2)} ${dev}</div></div>`:''}
-        ${eb.nb_ventes?`<div class="ebay-stat"><div class="lbl">Ventes</div><div class="val">${eb.nb_ventes}</div></div>`:''}
-      </div>
-      <ul class="sale-list">${eb.ventes.slice(0,8).map(v=>`
-        <li class="sale">
-          <span class="sale-price">${v.prix.toFixed(2)} ${esc(v.devise||dev)}</span>
-          <span class="sale-title">${v.url?`<a href="${esc(v.url)}" target="_blank">${esc(v.titre)}</a>`:esc(v.titre)}</span>
-          ${v.date?`<span class="sale-date">${esc(v.date)}</span>`:''}
-        </li>`).join('')}
-      </ul>
-    </div>`;
-  s.insertAdjacentHTML('afterend', html);
+function renderEbay(eb, after){
+  if(!eb||eb.erreur||!eb.ventes?.length||!after) return;
+  const dev=eb.devise||'';
+  const html=`<div class="section">
+    <div class="section-title">
+      <span>Ventes eBay</span>
+      ${eb.url_recherche?`<a class="link-ext" href="${esc(eb.url_recherche)}" target="_blank">Voir →</a>`:''}
+    </div>
+    <div class="ebay-stats">
+      ${eb.mediane!=null?`<div class="ebay-stat"><div class="lbl">Médiane</div><div class="val">${eb.mediane.toFixed(2)} ${dev}</div></div>`:''}
+      ${eb.moyenne!=null?`<div class="ebay-stat"><div class="lbl">Moyenne</div><div class="val">${eb.moyenne.toFixed(2)} ${dev}</div></div>`:''}
+      ${eb.nb_ventes?`<div class="ebay-stat"><div class="lbl">Ventes</div><div class="val">${eb.nb_ventes}</div></div>`:''}
+    </div>
+    <ul class="sale-list">${eb.ventes.slice(0,8).map(v=>`
+      <li class="sale">
+        <span class="sale-price">${v.prix.toFixed(2)} ${esc(v.devise||dev)}</span>
+        <span class="sale-title">${v.url?`<a href="${esc(v.url)}" target="_blank">${esc(v.titre)}</a>`:esc(v.titre)}</span>
+        ${v.date?`<span class="sale-date">${esc(v.date)}</span>`:''}
+      </li>`).join('')}
+    </ul>
+  </div>`;
+  after.insertAdjacentHTML('afterend', html);
 }
 
-// ---- Utilitaires ----
 function showToast(msg){ toast.textContent=msg; toast.classList.add('on'); setTimeout(()=>toast.classList.remove('on'),4000); }
 function esc(s){ if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ---- Init ----
-if(!getServer()) setTimeout(showSettings, 600);
+if(!getServer()) setTimeout(showSettings, 500);
 startCamera();
 </script>
-
-<script>
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-</script>
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 </body>
 </html>
