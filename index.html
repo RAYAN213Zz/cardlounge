@@ -12,30 +12,19 @@
 <link rel="apple-touch-icon" href="icon-192.png"/>
 <style>
 :root{
-  --bg:#0f0d0b;
-  --panel:#1a1612;
-  --raised:#231e18;
-  --line:#332b22;
-  --gold:#c9a24b;
-  --gold2:#e8c06a;
-  --cyan:#5fd8c9;
-  --pink:#d6618f;
-  --text:#f0e8dc;
-  --dim:#8a7d6e;
-  --green:#4caf88;
-  --orange:#e8964a;
+  --bg:#0f0d0b;--panel:#1a1612;--raised:#231e18;--line:#332b22;
+  --gold:#c9a24b;--gold2:#e8c06a;--cyan:#5fd8c9;--pink:#d6618f;
+  --text:#f0e8dc;--dim:#8a7d6e;--green:#4caf88;--orange:#e8964a;
   --r:16px;
-  --sft:env(safe-area-inset-top,0px);
-  --sfb:env(safe-area-inset-bottom,0px);
+  --sft:env(safe-area-inset-top,0px);--sfb:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;overflow:hidden}
 
-/* ====== VUE SCANNER ====== */
+/* ======= VUE SCANNER ======= */
 #vue-scan{position:fixed;inset:0;display:flex;flex-direction:column;background:#000}
 #video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 
-/* Header */
 #scan-header{
   position:relative;z-index:20;
   display:flex;align-items:center;justify-content:space-between;
@@ -46,20 +35,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-
 .logo span{color:#fff;font-weight:400;font-size:.75rem;opacity:.7;margin-left:6px}
 #btn-settings{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.3rem;cursor:pointer;padding:6px}
 
-/* SVG masque */
 #svg-mask{position:absolute;inset:0;pointer-events:none;z-index:5}
 
-/* Cadre carte */
 #frame{
   position:absolute;top:50%;left:50%;
   transform:translate(-50%,-56%);
-  width:min(68vw,240px);
-  aspect-ratio:63/88;
+  width:min(68vw,240px);aspect-ratio:63/88;
   z-index:10;pointer-events:none;
 }
 #frame::before,#frame::after,.fc-bl,.fc-br{
-  content:'';position:absolute;
-  width:28px;height:28px;
+  content:'';position:absolute;width:28px;height:28px;
   border-color:var(--gold);border-style:solid;
 }
 #frame::before{top:-2px;left:-2px;border-width:3px 0 0 3px;border-radius:6px 0 0 0}
@@ -67,178 +52,217 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-
 .fc-bl{bottom:-2px;left:-2px;border-width:0 0 3px 3px;border-radius:0 0 0 6px}
 .fc-br{bottom:-2px;right:-2px;border-width:0 3px 3px 0;border-radius:0 0 6px 0}
 
-/* Ligne de scan animée */
-#scan-line{
-  position:absolute;left:4px;right:4px;height:2px;
-  background:linear-gradient(to right,transparent,var(--gold),transparent);
-  opacity:0;top:0;
-}
+#scan-line{position:absolute;left:4px;right:4px;height:2px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:0;top:0}
 #frame.scanning #scan-line{opacity:.8;animation:scanline 1.8s ease-in-out infinite}
 @keyframes scanline{0%{top:4px;opacity:0}10%{opacity:.8}90%{opacity:.8}100%{top:calc(100% - 4px);opacity:0}}
 
-/* Label sous le cadre */
 #frame-label{
   position:absolute;top:calc(100% + 14px);left:50%;transform:translateX(-50%);
-  white-space:nowrap;
-  font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
-  color:rgba(255,255,255,.65);
-  background:rgba(0,0,0,.4);
-  padding:4px 12px;border-radius:20px;
+  white-space:nowrap;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.65);background:rgba(0,0,0,.4);padding:4px 12px;border-radius:20px;
 }
 
-/* === BATCH : bande thumbnails === */
+/* Bande batch thumbnails */
 #batch-strip{
-  position:absolute;bottom:130px;left:0;right:0;z-index:25;
-  display:none;
-  padding:0 12px;
+  position:absolute;bottom:128px;left:0;right:0;z-index:25;display:none;padding:0 10px;
 }
 #batch-strip.on{display:block}
 #batch-thumbs{
-  display:flex;gap:6px;overflow-x:auto;
-  padding:6px 0;
+  display:flex;gap:6px;overflow-x:auto;padding:6px 2px;
   scrollbar-width:none;
 }
 #batch-thumbs::-webkit-scrollbar{display:none}
+.bwrap{position:relative;flex-shrink:0}
 .bthumb{
-  flex-shrink:0;width:42px;height:59px;
-  border-radius:5px;object-fit:cover;
-  border:2px solid var(--gold);
-  position:relative;cursor:pointer;
-  opacity:.85;transition:opacity .15s;
+  width:40px;height:56px;border-radius:5px;object-fit:cover;display:block;
+  border:2px solid var(--gold);opacity:.85;
 }
-.bthumb:hover{opacity:1}
-.bthumb-del{
-  position:absolute;top:-5px;right:-5px;
-  width:16px;height:16px;border-radius:50%;
-  background:#c0392b;color:#fff;
-  font-size:9px;font-weight:700;
+.bstatus{
+  position:absolute;inset:0;border-radius:5px;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;border:1.5px solid #000;
+  font-size:.9rem;
+  background:rgba(0,0,0,.45);
 }
+.bstatus.done{background:rgba(76,175,136,.3)}
+.bstatus.err{background:rgba(214,97,143,.3)}
 
 /* Contrôles bas */
 #scan-controls{
   position:absolute;bottom:0;left:0;right:0;z-index:20;
-  padding:20px 28px calc(var(--sfb) + 28px);
-  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px calc(var(--sfb) + 24px);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
   background:linear-gradient(to top,rgba(0,0,0,.8) 60%,transparent);
 }
 
-/* Bouton shutter */
 #btn-shutter{
-  width:78px;height:78px;border-radius:50%;
-  background:#fff;border:5px solid rgba(255,255,255,.3);
-  cursor:pointer;position:relative;
+  width:78px;height:78px;border-radius:50%;background:#fff;
+  border:5px solid rgba(255,255,255,.3);cursor:pointer;position:relative;
   transition:transform .12s;flex-shrink:0;
 }
 #btn-shutter:active{transform:scale(.9)}
-#btn-shutter::after{
-  content:'';position:absolute;inset:5px;
-  border-radius:50%;background:#fff;border:2px solid #ddd;
-}
+#btn-shutter::after{content:'';position:absolute;inset:5px;border-radius:50%;background:#fff;border:2px solid #ddd}
 #btn-shutter.scanning{background:var(--gold);border-color:rgba(201,162,75,.4)}
 #btn-shutter.scanning::after{background:var(--gold)}
 
-/* Bouton OK batch */
-#btn-batch-ok{
-  width:78px;height:78px;border-radius:50%;
-  background:var(--gold);border:5px solid rgba(201,162,75,.3);
-  cursor:pointer;display:none;
-  align-items:center;justify-content:center;
-  flex-direction:column;gap:2px;flex-shrink:0;
-  transition:transform .12s;
-}
-#btn-batch-ok:active{transform:scale(.9)}
-#btn-batch-ok.on{display:flex}
-.bok-label{font-size:.58rem;font-weight:800;color:var(--bg);letter-spacing:.06em;text-transform:uppercase}
-.bok-count{font-size:1.1rem;font-weight:900;color:var(--bg);line-height:1}
-
-/* Toggle mode batch */
 #btn-mode{
-  width:50px;height:50px;border-radius:14px;
+  width:54px;height:54px;border-radius:14px;
   background:rgba(255,255,255,.1);backdrop-filter:blur(8px);
   border:1.5px solid rgba(255,255,255,.2);
-  color:rgba(255,255,255,.7);font-size:.62rem;font-weight:700;
+  color:rgba(255,255,255,.7);font-size:.58rem;font-weight:700;
   cursor:pointer;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;
-  letter-spacing:.04em;text-transform:uppercase;
-  transition:background .2s,border-color .2s,color .2s;
+  letter-spacing:.04em;text-transform:uppercase;transition:all .2s;
 }
-#btn-mode.batch-on{
-  background:rgba(201,162,75,.2);
-  border-color:var(--gold);color:var(--gold);
+#btn-mode.on{background:rgba(201,162,75,.2);border-color:var(--gold);color:var(--gold)}
+.mode-icon{font-size:1.15rem}
+
+#btn-batch-validate{
+  width:54px;height:54px;border-radius:14px;
+  background:var(--gold);border:none;cursor:pointer;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  transition:transform .12s;
 }
-.mode-icon{font-size:1.1rem}
+#btn-batch-validate.on{display:flex}
+#btn-batch-validate:active{transform:scale(.9)}
+.bv-num{font-size:1.1rem;font-weight:900;color:var(--bg);line-height:1}
+.bv-lbl{font-size:.52rem;font-weight:800;color:var(--bg);letter-spacing:.06em;text-transform:uppercase}
 
 #btn-flip{
-  width:50px;height:50px;border-radius:50%;
+  width:54px;height:54px;border-radius:50%;
   background:rgba(255,255,255,.12);backdrop-filter:blur(8px);
   border:1px solid rgba(255,255,255,.2);
   color:#fff;font-size:1.3rem;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
 }
 
-#btn-last{
-  width:50px;height:50px;border-radius:12px;
-  overflow:hidden;border:2.5px solid transparent;
-  background:var(--raised);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--dim);font-size:1.4rem;
-}
-#btn-last.has-photo{border-color:var(--gold)}
-#btn-last img{width:100%;height:100%;object-fit:cover;display:none}
-#btn-last.has-photo img{display:block}
-
-/* Badge traitement */
 #processing{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   z-index:30;display:none;
-  background:rgba(15,13,11,.92);
-  border:1px solid var(--line);
-  border-radius:20px;padding:22px 30px;
-  text-align:center;backdrop-filter:blur(12px);min-width:180px;
+  background:rgba(15,13,11,.92);border:1px solid var(--line);
+  border-radius:20px;padding:22px 30px;text-align:center;backdrop-filter:blur(12px);min-width:180px;
 }
 #processing.on{display:block}
-.spinner{
-  width:38px;height:38px;border-radius:50%;
-  border:3px solid var(--raised);border-top-color:var(--gold);
-  animation:spin .7s linear infinite;margin:0 auto 10px;
-}
+.spinner{width:38px;height:38px;border-radius:50%;border:3px solid var(--raised);border-top-color:var(--gold);animation:spin .7s linear infinite;margin:0 auto 10px}
 @keyframes spin{to{transform:rotate(360deg)}}
 #proc-msg{font-size:.72rem;letter-spacing:.06em;color:var(--dim)}
 
-/* Toast erreur */
 #toast{
   position:absolute;bottom:calc(var(--sfb) + 120px);left:20px;right:20px;z-index:40;
   background:#3a1020;border:1px solid var(--pink);border-radius:12px;
-  padding:12px 16px;font-size:.8rem;color:var(--pink);
-  text-align:center;display:none;
+  padding:12px 16px;font-size:.8rem;color:var(--pink);text-align:center;display:none;
 }
 #toast.on{display:block}
 canvas{display:none}
 
-/* ====== VUE RÉSULTATS ====== */
+/* ======= VUE RÉSULTAT SIMPLE ======= */
 #vue-results{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
 #vue-results.on{display:flex}
-
-#res-header{
-  position:sticky;top:0;z-index:10;
-  background:var(--bg);border-bottom:1px solid var(--line);
-  padding:calc(var(--sft) + 10px) 16px 10px;
-  display:flex;align-items:center;gap:12px;
-}
+#res-header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(var(--sft) + 10px) 16px 10px;display:flex;align-items:center;gap:12px}
 #btn-back{background:none;border:none;font-size:1.6rem;color:var(--gold);cursor:pointer;line-height:1;padding:4px 8px 4px 0}
 .res-logo{font-size:1.1rem;font-weight:800;color:var(--gold)}
-#res-count{font-size:.72rem;color:var(--dim);margin-left:auto}
-
 #res-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(var(--sfb) + 24px)}
 
-/* Card résultat */
-.card-hero{display:flex;gap:14px;align-items:flex-start;margin-bottom:8px}
+/* ======= VUE BATCH RÉSULTATS (navigateur carte par carte) ======= */
+#vue-batch{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
+#vue-batch.on{display:flex}
+
+#batch-header{
+  position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+  padding:calc(var(--sft) + 10px) 16px 10px;
+  display:flex;align-items:center;gap:10px;
+}
+#btn-batch-back{background:none;border:none;font-size:1.6rem;color:var(--gold);cursor:pointer;line-height:1;padding:4px 8px 4px 0}
+#batch-prog{flex:1}
+#batch-prog-bar-track{height:4px;background:var(--raised);border-radius:2px;overflow:hidden;margin-bottom:4px}
+#batch-prog-bar{height:100%;background:var(--gold);border-radius:2px;transition:width .3s}
+#batch-prog-txt{font-size:.65rem;color:var(--dim);letter-spacing:.06em}
+
+#batch-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 0}
+
+/* Sélecteur de prix */
+.prix-grid-sel{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+.prix-cell-sel{
+  background:var(--raised);border-radius:10px;border:2px solid transparent;
+  padding:10px 4px 8px;text-align:center;cursor:pointer;
+  transition:border-color .15s,background .15s;
+}
+.prix-cell-sel:active{opacity:.75}
+.prix-cell-sel.selected{border-color:var(--gold);background:rgba(201,162,75,.12)}
+.prix-cell-sel.na-cell{opacity:.35;cursor:default}
+.prix-code{font-size:.58rem;letter-spacing:.1em;margin-bottom:5px}
+.prix-val{font-size:.9rem;font-weight:700;color:var(--text)}
+.prix-val.na{color:#c0392b;opacity:.45}
+.etat-MT .prix-code,.etat-NM .prix-code{color:var(--green)}
+.etat-EX .prix-code,.etat-GD .prix-code{color:var(--cyan)}
+.etat-LP .prix-code,.etat-PL .prix-code{color:var(--orange)}
+.etat-PO .prix-code{color:var(--pink)}
+
+.sel-hint{font-size:.65rem;color:var(--dim);text-align:center;margin-bottom:12px;letter-spacing:.04em}
+.selected-price-display{
+  text-align:center;padding:8px;margin-bottom:12px;
+  background:rgba(201,162,75,.1);border-radius:10px;border:1px solid rgba(201,162,75,.3);
+  font-size:.82rem;color:var(--gold);font-weight:700;display:none;
+}
+.selected-price-display.on{display:block}
+
+/* Boutons navigation */
+#batch-nav{
+  position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);
+  padding:12px 16px calc(var(--sfb) + 12px);
+  display:flex;gap:10px;
+}
+#btn-skip{
+  flex:1;background:transparent;border:1.5px solid var(--line);
+  border-radius:12px;padding:13px;font-size:.85rem;font-weight:600;
+  color:var(--dim);cursor:pointer;transition:border-color .15s;
+}
+#btn-skip:active{border-color:var(--dim)}
+#btn-next{
+  flex:2;background:var(--gold);border:none;
+  border-radius:12px;padding:13px;font-size:.9rem;font-weight:800;
+  color:var(--bg);cursor:pointer;transition:opacity .15s;letter-spacing:.03em;
+}
+#btn-next:active{opacity:.8}
+
+/* ======= VUE RECAP ======= */
+#vue-recap{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
+#vue-recap.on{display:flex}
+#recap-header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(var(--sft) + 10px) 16px 10px;display:flex;align-items:center;gap:12px}
+#btn-recap-back{background:none;border:none;font-size:1.6rem;color:var(--gold);cursor:pointer;line-height:1;padding:4px 8px 4px 0}
+#recap-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(var(--sfb) + 24px)}
+
+.recap-total{
+  background:var(--panel);border:1.5px solid var(--gold);border-radius:var(--r);
+  padding:20px;text-align:center;margin-bottom:16px;
+}
+.recap-total-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin-bottom:6px}
+.recap-total-val{font-size:2.2rem;font-weight:900;color:var(--gold);letter-spacing:-.02em}
+.recap-total-count{font-size:.72rem;color:var(--dim);margin-top:4px}
+
+.recap-row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;margin-bottom:8px;
+}
+.recap-thumb{width:32px;height:45px;border-radius:4px;object-fit:cover;flex-shrink:0;border:1px solid var(--line)}
+.recap-info{flex:1;min-width:0}
+.recap-name{font-size:.82rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recap-etat{font-size:.65rem;color:var(--dim);margin-top:2px}
+.recap-price{font-size:.95rem;font-weight:800;color:var(--gold);white-space:nowrap}
+.recap-price.skipped{color:var(--dim);font-size:.75rem;font-weight:400}
+
+.btn-new-scan{
+  width:100%;margin-top:16px;background:transparent;
+  border:1.5px solid var(--gold);border-radius:14px;padding:15px;
+  font-size:.95rem;font-weight:700;color:var(--gold);cursor:pointer;letter-spacing:.04em;transition:background .15s;
+}
+.btn-new-scan:active{background:rgba(201,162,75,.1)}
+
+/* ======= STYLES PARTAGÉS ======= */
+.card-hero{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px}
 .card-hero img{width:90px;flex-shrink:0;border-radius:10px;border:1.5px solid var(--line);object-fit:cover;aspect-ratio:63/88}
 .card-hero-info{flex:1;padding-top:2px}
-.card-name{font-size:1.3rem;font-weight:700;line-height:1.2;margin-bottom:4px;color:var(--text)}
+.card-name{font-size:1.2rem;font-weight:700;line-height:1.2;margin-bottom:4px;color:var(--text)}
 .card-name-en{font-size:.82rem;color:var(--dim);margin-bottom:8px}
 .conf-badge{display:inline-block;font-size:.6rem;padding:2px 8px;border-radius:10px;letter-spacing:.06em;margin-bottom:8px}
 .conf-high{background:rgba(76,175,136,.15);color:var(--green)}
@@ -247,37 +271,13 @@ canvas{display:none}
 .pills{display:flex;flex-wrap:wrap;gap:6px}
 .pill{font-size:.64rem;padding:3px 8px;background:var(--raised);border-radius:6px;color:var(--dim)}
 .pill-grade{background:rgba(201,162,75,.15);color:var(--gold);border:1px solid rgba(201,162,75,.3)}
-.etat-note{font-size:.78rem;color:var(--orange);margin-top:8px}
 
-/* Section prix */
 .section{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
 .section-title{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 .link-ext{color:var(--cyan);text-decoration:none;font-size:.64rem}
-
-/* Séparateur batch */
-.batch-sep{
-  display:flex;align-items:center;gap:10px;margin:20px 0 14px;
-}
-.batch-sep-line{flex:1;height:1px;background:var(--line)}
-.batch-sep-txt{font-size:.62rem;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
-.batch-num{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:20px;height:20px;border-radius:50%;
-  background:var(--gold);color:var(--bg);
-  font-size:.62rem;font-weight:900;margin-right:4px;
-}
-
+.loading-prix{font-size:.72rem;color:var(--dim);font-style:italic}
 .prix-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .prix-cell{background:var(--raised);border-radius:10px;padding:10px 4px 8px;text-align:center}
-.prix-code{font-size:.58rem;letter-spacing:.1em;margin-bottom:5px}
-.prix-val{font-size:.9rem;font-weight:700;color:var(--text)}
-.prix-val.na{color:#c0392b;opacity:.45}
-.etat-MT .prix-code,.etat-NM .prix-code{color:var(--green)}
-.etat-EX .prix-code,.etat-GD .prix-code{color:var(--cyan)}
-.etat-LP .prix-code,.etat-PL .prix-code{color:var(--orange)}
-.etat-PO .prix-code{color:var(--pink)}
-.loading-prix{font-size:.72rem;color:var(--dim);font-style:italic}
-
 .ebay-stats{display:flex;gap:18px;margin-bottom:12px;flex-wrap:wrap}
 .ebay-stat .lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:2px}
 .ebay-stat .val{font-size:1rem;font-weight:700;color:var(--gold)}
@@ -288,19 +288,8 @@ canvas{display:none}
 .sale-title{color:var(--dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sale-title a{color:inherit;text-decoration:none}
 .sale-date{font-size:.62rem;color:var(--dim);white-space:nowrap}
-.etat-note-res{font-size:.78rem;color:var(--orange);margin-top:8px}
 
-/* Btn nouveau scan */
-.btn-new-scan{
-  width:100%;margin-top:16px;
-  background:transparent;border:1.5px solid var(--gold);
-  border-radius:14px;padding:15px;font-size:.95rem;font-weight:700;
-  color:var(--gold);cursor:pointer;letter-spacing:.04em;
-  transition:background .15s;
-}
-.btn-new-scan:active{background:rgba(201,162,75,.1)}
-
-/* ====== VUE SETTINGS ====== */
+/* Settings */
 #vue-settings{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
 #vue-settings.on{display:flex}
 #set-header{padding:calc(var(--sft) + 12px) 16px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
@@ -311,7 +300,7 @@ canvas{display:none}
 .set-input:focus{border-color:var(--gold)}
 .set-hint{font-size:.72rem;color:var(--dim);margin-top:8px;line-height:1.5}
 .set-hint a{color:var(--cyan)}
-.set-save{width:100%;margin-top:20px;background:var(--gold);border:none;border-radius:12px;padding:15px;font-size:.95rem;font-weight:700;color:var(--bg);cursor:pointer;transition:opacity .15s}
+.set-save{width:100%;margin-top:20px;background:var(--gold);border:none;border-radius:12px;padding:15px;font-size:.95rem;font-weight:700;color:var(--bg);cursor:pointer}
 .set-save:active{opacity:.8}
 .set-ok{text-align:center;margin-top:12px;font-size:.78rem;color:var(--green);display:none}
 .set-ok.on{display:block}
@@ -322,64 +311,70 @@ canvas{display:none}
 </head>
 <body>
 
-<!-- ===== VUE SCANNER ===== -->
+<!-- SCANNER -->
 <div id="vue-scan">
   <video id="video" autoplay playsinline muted></video>
-
   <svg id="svg-mask" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <mask id="m">
-        <rect width="100%" height="100%" fill="white"/>
-        <rect id="hole" rx="14" ry="14" fill="black"/>
-      </mask>
-    </defs>
+    <defs><mask id="m"><rect width="100%" height="100%" fill="white"/><rect id="hole" rx="14" ry="14" fill="black"/></mask></defs>
     <rect width="100%" height="100%" fill="rgba(0,0,0,.6)" mask="url(#m)"/>
   </svg>
-
   <div id="frame">
     <span class="fc-bl"></span><span class="fc-br"></span>
     <div id="scan-line"></div>
     <div id="frame-label">Cadre la carte ici</div>
   </div>
-
   <div id="scan-header">
     <div class="logo">CardLounge <span>Scanner</span></div>
     <button id="btn-settings">⚙️</button>
   </div>
-
-  <!-- Bande thumbnails batch -->
-  <div id="batch-strip">
-    <div id="batch-thumbs"></div>
-  </div>
-
+  <div id="batch-strip"><div id="batch-thumbs"></div></div>
   <div id="scan-controls">
-    <button id="btn-mode" title="Mode batch"><span class="mode-icon">📚</span><span style="font-size:.55rem">Batch</span></button>
+    <button id="btn-mode"><span class="mode-icon">📚</span><span style="font-size:.52rem">Batch</span></button>
     <button id="btn-shutter"></button>
-    <button id="btn-batch-ok"><span class="bok-count" id="bok-count">0</span><span class="bok-label">Scanner</span></button>
+    <button id="btn-batch-validate"><span class="bv-num" id="bv-num">0</span><span class="bv-lbl">OK</span></button>
     <button id="btn-flip">🔄</button>
   </div>
-
-  <div id="processing">
-    <div class="spinner"></div>
-    <div id="proc-msg">Identification…</div>
-  </div>
-
+  <div id="processing"><div class="spinner"></div><div id="proc-msg">Identification…</div></div>
   <div id="toast"></div>
 </div>
 
-<!-- ===== VUE RÉSULTATS ===== -->
+<!-- RÉSULTAT UNIQUE -->
 <div id="vue-results">
   <div id="res-header">
     <button id="btn-back">←</button>
     <div class="res-logo">CardLounge</div>
-    <span id="res-count"></span>
   </div>
-  <div id="res-scroll">
-    <div id="res-content"></div>
+  <div id="res-scroll"><div id="res-content"></div></div>
+</div>
+
+<!-- BATCH NAVIGATEUR CARTE PAR CARTE -->
+<div id="vue-batch">
+  <div id="batch-header">
+    <button id="btn-batch-back">←</button>
+    <div id="batch-prog">
+      <div id="batch-prog-bar-track"><div id="batch-prog-bar" style="width:0%"></div></div>
+      <div id="batch-prog-txt">Carte 1 / 1</div>
+    </div>
+  </div>
+  <div id="batch-scroll" style="padding-bottom:0">
+    <div id="batch-card-content"></div>
+  </div>
+  <div id="batch-nav">
+    <button id="btn-skip">Passer</button>
+    <button id="btn-next">Suivant →</button>
   </div>
 </div>
 
-<!-- ===== VUE SETTINGS ===== -->
+<!-- RÉCAP FINAL -->
+<div id="vue-recap">
+  <div id="recap-header">
+    <button id="btn-recap-back">←</button>
+    <div class="res-logo">Récapitulatif</div>
+  </div>
+  <div id="recap-scroll"><div id="recap-content"></div></div>
+</div>
+
+<!-- SETTINGS -->
 <div id="vue-settings">
   <div id="set-header">
     <button id="btn-set-back">←</button>
@@ -387,23 +382,15 @@ canvas{display:none}
   </div>
   <div id="set-body">
     <div class="set-label">URL du serveur</div>
-    <input id="set-url" class="set-input" type="url"
-      placeholder="https://xxxx.ngrok-free.app"
-      autocomplete="off" autocorrect="off" spellcheck="false"/>
-    <div class="set-hint">
-      Colle ici l'URL ngrok de ton PC.<br>
-      <a href="https://ngrok.com/download" target="_blank">Télécharger ngrok →</a>
-    </div>
+    <input id="set-url" class="set-input" type="url" placeholder="https://xxxx.ngrok-free.app" autocomplete="off" autocorrect="off" spellcheck="false"/>
+    <div class="set-hint">Colle ici l'URL ngrok de ton PC.<br><a href="https://ngrok.com/download" target="_blank">Télécharger ngrok →</a></div>
     <button class="set-save" id="btn-save-url">Enregistrer</button>
     <div class="set-ok" id="set-ok">✓ URL enregistrée</div>
     <div class="ngrok-box">
-      <strong>Comment obtenir l'URL ngrok</strong>
-      <br>1. Lance le serveur :
-      <code>uvicorn app:app --host 0.0.0.0 --port 8000</code>
-      2. Lance ngrok :
-      <code>ngrok http 8000</code>
-      3. Copie l'URL <strong>https://…ngrok-free.app</strong>
-      <br>et colle-la ci-dessus.
+      <strong>Comment obtenir l'URL ngrok</strong><br>
+      1. Lance le serveur : <code>uvicorn app:app --host 0.0.0.0 --port 8000</code>
+      2. Lance ngrok : <code>ngrok http 8000</code>
+      3. Copie l'URL <strong>https://…ngrok-free.app</strong> et colle-la ci-dessus.
     </div>
   </div>
 </div>
@@ -411,391 +398,274 @@ canvas{display:none}
 <canvas id="canvas"></canvas>
 
 <script>
-// ---- Config ----
+// ======= CONFIG =======
 const LS_KEY = 'cl_server';
 function getServer(){ return localStorage.getItem(LS_KEY)||''; }
-function setServer(u){ localStorage.setItem(LS_KEY, u.replace(/\/+$/,'')); }
-
-// ---- Éléments ----
-const video      = document.getElementById('video');
-const canvas     = document.getElementById('canvas');
-const frame      = document.getElementById('frame');
-const hole       = document.getElementById('hole');
-const scanLine   = document.getElementById('scan-line');
-const frameLabel = document.getElementById('frame-label');
-const btnShut    = document.getElementById('btn-shutter');
-const btnFlip    = document.getElementById('btn-flip');
-const btnMode    = document.getElementById('btn-mode');
-const btnBatchOk = document.getElementById('btn-batch-ok');
-const bokCount   = document.getElementById('bok-count');
-const batchStrip = document.getElementById('batch-strip');
-const batchThumbs= document.getElementById('batch-thumbs');
-const proc       = document.getElementById('processing');
-const procMsg    = document.getElementById('proc-msg');
-const toast      = document.getElementById('toast');
-const vueScan    = document.getElementById('vue-scan');
-const vueRes     = document.getElementById('vue-results');
-const vueSet     = document.getElementById('vue-settings');
-const btnBack    = document.getElementById('btn-back');
-const btnSetOpen = document.getElementById('btn-settings');
-const btnSetBack = document.getElementById('btn-set-back');
-const btnSaveUrl = document.getElementById('btn-save-url');
-const setUrlInp  = document.getElementById('set-url');
-const setOk      = document.getElementById('set-ok');
-const resContent = document.getElementById('res-content');
-const resCount   = document.getElementById('res-count');
-
+function setServer(u){ localStorage.setItem(LS_KEY,u.replace(/\/+$/,'')); }
 const ETATS = ['MT','NM','EX','GD','LP','PL','PO'];
 
-// ---- Mode batch ----
+// ======= ÉLÉMENTS =======
+const video       = document.getElementById('video');
+const canvas      = document.getElementById('canvas');
+const frame       = document.getElementById('frame');
+const hole        = document.getElementById('hole');
+const frameLabel  = document.getElementById('frame-label');
+const btnShut     = document.getElementById('btn-shutter');
+const btnFlip     = document.getElementById('btn-flip');
+const btnMode     = document.getElementById('btn-mode');
+const btnBatchVal = document.getElementById('btn-batch-validate');
+const bvNum       = document.getElementById('bv-num');
+const batchStrip  = document.getElementById('batch-strip');
+const batchThumbs = document.getElementById('batch-thumbs');
+const proc        = document.getElementById('processing');
+const procMsg     = document.getElementById('proc-msg');
+const toast       = document.getElementById('toast');
+const vueScan     = document.getElementById('vue-scan');
+const vueRes      = document.getElementById('vue-results');
+const vueBatch    = document.getElementById('vue-batch');
+const vueRecap    = document.getElementById('vue-recap');
+const vueSet      = document.getElementById('vue-settings');
+const resContent  = document.getElementById('res-content');
+const batchCardC  = document.getElementById('batch-card-content');
+const recapContent= document.getElementById('recap-content');
+const batchProgBar= document.getElementById('batch-prog-bar');
+const batchProgTxt= document.getElementById('batch-prog-txt');
+const selPriceDisp= null; // créé dynamiquement
+
+// ======= NAVIGATION =======
+function hideAll(){
+  vueScan.style.display='none';
+  vueRes.classList.remove('on');
+  vueBatch.classList.remove('on');
+  vueRecap.classList.remove('on');
+  vueSet.classList.remove('on');
+}
+function showScan(){
+  hideAll(); vueScan.style.display='';
+  resetUI();
+}
+function showResults(){ hideAll(); vueRes.classList.add('on'); }
+function showBatch()  { hideAll(); vueBatch.classList.add('on'); }
+function showRecap()  { hideAll(); vueRecap.classList.add('on'); }
+function showSettings(){ hideAll(); vueSet.classList.add('on'); }
+
+document.getElementById('btn-back').addEventListener('click', showScan);
+document.getElementById('btn-batch-back').addEventListener('click', showScan);
+document.getElementById('btn-recap-back').addEventListener('click', ()=>showBatch());
+document.getElementById('btn-settings').addEventListener('click',()=>{ document.getElementById('set-url').value=getServer(); document.getElementById('set-ok').classList.remove('on'); showSettings(); });
+document.getElementById('btn-set-back').addEventListener('click', showScan);
+document.getElementById('btn-save-url').addEventListener('click',()=>{
+  setServer(document.getElementById('set-url').value.trim());
+  document.getElementById('set-ok').classList.add('on');
+  setTimeout(()=>{ document.getElementById('set-ok').classList.remove('on'); showScan(); },1000);
+});
+
+// ======= CAMÉRA =======
+let facingMode='environment', stream=null;
+async function startCamera(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode,width:{ideal:1920},height:{ideal:1080}},audio:false});
+    video.srcObject=stream;
+    video.addEventListener('loadedmetadata',syncMask,{once:true});
+  }catch(e){ showToast('Caméra inaccessible'); }
+}
+function syncMask(){
+  const r=frame.getBoundingClientRect();
+  hole.setAttribute('x',r.left);hole.setAttribute('y',r.top);
+  hole.setAttribute('width',r.width);hole.setAttribute('height',r.height);
+}
+window.addEventListener('resize',syncMask);
+setTimeout(syncMask,400);
+btnFlip.addEventListener('click',()=>{ facingMode=facingMode==='environment'?'user':'environment'; startCamera(); });
+
+// ======= BATCH STATE =======
 let batchMode = false;
-// [{blob, url}]
-let batchQueue = [];
+// Chaque item : {blob, url, photoUrl(objectURL), scan:null|{...}, prices:null|{...}, ebay:null|{...}, status:'scanning'|'done'|'error'}
+let batchItems = [];
+let batchCurrentIdx = 0;
+let batchSelections = []; // {idx, condition, price}
 
 function setBatchMode(on){
-  batchMode = on;
-  btnMode.classList.toggle('batch-on', on);
-  if(!on){
-    clearBatch();
-  } else {
-    frameLabel.textContent = 'Prends tes cartes une par une';
+  batchMode=on;
+  btnMode.classList.toggle('on',on);
+  if(on){
+    frameLabel.textContent='Photo 1 — appuie pour capturer';
     batchStrip.classList.add('on');
+  } else {
+    clearBatch();
   }
 }
 
 function clearBatch(){
-  batchQueue.forEach(i=>URL.revokeObjectURL(i.url));
-  batchQueue = [];
-  batchThumbs.innerHTML = '';
+  batchItems.forEach(i=>{ try{ URL.revokeObjectURL(i.url); }catch{} });
+  batchItems=[];
+  batchSelections=[];
+  batchThumbs.innerHTML='';
   batchStrip.classList.remove('on');
-  bokCount.textContent = '0';
-  btnBatchOk.classList.remove('on');
-  frameLabel.textContent = 'Cadre la carte ici';
+  bvNum.textContent='0';
+  btnBatchVal.classList.remove('on');
+  frameLabel.textContent='Cadre la carte ici';
 }
 
 function updateBatchUI(){
-  bokCount.textContent = batchQueue.length;
-  if(batchQueue.length > 0){
-    btnBatchOk.classList.add('on');
-    btnShut.style.display = 'none';
-  } else {
-    btnBatchOk.classList.remove('on');
-    btnShut.style.display = '';
-  }
-}
-
-function addBatchThumb(item, idx){
-  const wrap = document.createElement('div');
-  wrap.style.position='relative';wrap.style.flexShrink='0';
-
-  const img = document.createElement('img');
-  img.src = item.url;
-  img.className = 'bthumb';
-  img.title = `Carte ${idx+1}`;
-
-  const del = document.createElement('div');
-  del.className = 'bthumb-del';
-  del.textContent = '×';
-  del.onclick = (e)=>{
-    e.stopPropagation();
-    URL.revokeObjectURL(item.url);
-    batchQueue.splice(idx, 1);
-    renderBatchThumbs();
-    updateBatchUI();
-  };
-
-  wrap.appendChild(img);
-  wrap.appendChild(del);
-  return wrap;
+  const n=batchItems.length;
+  bvNum.textContent=n;
+  if(n>0){ btnBatchVal.classList.add('on'); }
+  else    { btnBatchVal.classList.remove('on'); }
+  frameLabel.textContent = n===0
+    ? 'Appuie pour capturer la carte 1'
+    : `${n} carte${n>1?'s':''} — continue ou appuie OK`;
 }
 
 function renderBatchThumbs(){
-  batchThumbs.innerHTML = '';
-  batchQueue.forEach((item, i)=>{
-    batchThumbs.appendChild(addBatchThumb(item, i));
+  batchThumbs.innerHTML='';
+  batchItems.forEach((item,i)=>{
+    const wrap=document.createElement('div');
+    wrap.className='bwrap';
+    const img=document.createElement('img');
+    img.className='bthumb';
+    img.src=item.url;
+    const st=document.createElement('div');
+    st.className='bstatus '+(item.status==='done'?'done':item.status==='error'?'err':'');
+    st.textContent=item.status==='done'?'✓':item.status==='error'?'⚠':'⏳';
+    st.id=`bst-${i}`;
+    wrap.appendChild(img);wrap.appendChild(st);
+    batchThumbs.appendChild(wrap);
   });
-  // Scroll au dernier
-  batchThumbs.scrollLeft = batchThumbs.scrollWidth;
+  batchThumbs.scrollLeft=batchThumbs.scrollWidth;
 }
 
-btnMode.addEventListener('click',()=> setBatchMode(!batchMode));
-btnBatchOk.addEventListener('click', lancerBatch);
-
-// ---- Navigation ----
-function showScan(){
-  vueScan.style.display='';
-  vueRes.classList.remove('on');
-  vueSet.classList.remove('on');
-  resetUI();
-}
-function showResults(){
-  vueScan.style.display='none';
-  vueRes.classList.add('on');
-  vueSet.classList.remove('on');
-}
-function showSettings(){
-  vueScan.style.display='none';
-  vueSet.classList.add('on');
-  vueRes.classList.remove('on');
+function updateThumbStatus(i){
+  const el=document.getElementById(`bst-${i}`);
+  if(!el) return;
+  const item=batchItems[i];
+  el.className='bstatus '+(item.status==='done'?'done':item.status==='error'?'err':'');
+  el.textContent=item.status==='done'?'✓':item.status==='error'?'⚠':'⏳';
 }
 
-btnBack.addEventListener('click', showScan);
-btnSetOpen.addEventListener('click',()=>{ setUrlInp.value=getServer(); setOk.classList.remove('on'); showSettings(); });
-btnSetBack.addEventListener('click', showScan);
-btnSaveUrl.addEventListener('click',()=>{
-  setServer(setUrlInp.value.trim());
-  setOk.classList.add('on');
-  setTimeout(()=>{ setOk.classList.remove('on'); showScan(); }, 1000);
-});
-
-// ---- Caméra ----
-let facingMode = 'environment';
-let stream = null;
-let lastPhotoBlob = null;
-let lastPhotoUrl  = null;
-
-async function startCamera(){
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  try{
-    stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode, width:{ideal:1920}, height:{ideal:1080} },
-      audio:false
-    });
-    video.srcObject = stream;
-    video.addEventListener('loadedmetadata', syncMask, {once:true});
-  } catch(e){
-    showToast('Caméra inaccessible — vérifie les permissions');
-  }
-}
-
-function syncMask(){
-  const r = frame.getBoundingClientRect();
-  hole.setAttribute('x', r.left);
-  hole.setAttribute('y', r.top);
-  hole.setAttribute('width', r.width);
-  hole.setAttribute('height', r.height);
-}
-window.addEventListener('resize', syncMask);
-setTimeout(syncMask, 400);
-
-btnFlip.addEventListener('click',()=>{
-  facingMode = facingMode==='environment'?'user':'environment';
-  startCamera();
-});
-
-// ---- Capture ----
-btnShut.addEventListener('click', capture);
+// ======= CAPTURE =======
+btnShut.addEventListener('click',capture);
+btnBatchVal.addEventListener('click',ouvrirBatchResults);
+btnMode.addEventListener('click',()=>setBatchMode(!batchMode));
 
 function capture(){
-  if(btnShut.classList.contains('scanning')) return;
+  if(btnShut.classList.contains('scanning')&&!batchMode) return;
 
   // Flash
-  const fl = document.createElement('div');
-  fl.style.cssText='position:fixed;inset:0;background:#fff;opacity:.6;z-index:99;pointer-events:none;transition:opacity .22s';
+  const fl=document.createElement('div');
+  fl.style.cssText='position:fixed;inset:0;background:#fff;opacity:.6;z-index:99;pointer-events:none;transition:opacity .2s';
   document.body.appendChild(fl);
-  setTimeout(()=>{ fl.style.opacity=0; setTimeout(()=>fl.remove(),220); }, 30);
+  setTimeout(()=>{ fl.style.opacity=0; setTimeout(()=>fl.remove(),200); },30);
 
-  const r   = frame.getBoundingClientRect();
-  const sw  = window.innerWidth, sh = window.innerHeight;
-  const vw  = video.videoWidth,  vh = video.videoHeight;
-  const sx  = r.left/sw*vw, sy = r.top/sh*vh;
-  const sw2 = r.width/sw*vw, sh2 = r.height/sh*vh;
+  const r=frame.getBoundingClientRect();
+  const sw=window.innerWidth,sh=window.innerHeight;
+  const vw=video.videoWidth,vh=video.videoHeight;
+  canvas.width=r.width/sw*vw; canvas.height=r.height/sh*vh;
+  canvas.getContext('2d').drawImage(video,r.left/sw*vw,r.top/sh*vh,canvas.width,canvas.height,0,0,canvas.width,canvas.height);
 
-  canvas.width = sw2; canvas.height = sh2;
-  canvas.getContext('2d').drawImage(video, sx, sy, sw2, sh2, 0, 0, sw2, sh2);
-
-  // Compression légère pour accélérer l'upload (qualité 0.82)
   canvas.toBlob(blob=>{
     if(batchMode){
-      const url = URL.createObjectURL(blob);
-      batchQueue.push({blob, url});
+      const url=URL.createObjectURL(blob);
+      const item={blob,url,scan:null,prices:null,ebay:null,status:'scanning'};
+      const idx=batchItems.length;
+      batchItems.push(item);
       renderBatchThumbs();
       updateBatchUI();
-      // Feedback vibration si dispo
-      navigator.vibrate && navigator.vibrate(40);
+      navigator.vibrate&&navigator.vibrate(40);
+      // Lance le scan en arrière-plan immédiatement
+      scanEnArrierePlan(idx);
     } else {
-      lastPhotoBlob = blob;
-      if(lastPhotoUrl) URL.revokeObjectURL(lastPhotoUrl);
-      lastPhotoUrl = URL.createObjectURL(blob);
-      scanSingle(blob, lastPhotoUrl);
+      // Mode simple
+      const url=URL.createObjectURL(blob);
+      scanSingle(blob,url);
     }
-  }, 'image/jpeg', 0.82);
+  },'image/jpeg',0.85);
 }
 
-// ---- Scan unique ----
-async function scanSingle(blob, photoUrl){
-  const server = getServer();
-  if(!server){ showSettings(); return; }
-
-  btnShut.classList.add('scanning');
-  frame.classList.add('scanning');
-  proc.classList.add('on');
-  procMsg.textContent = 'Identification de la carte…';
-  toast.classList.remove('on');
-  resContent.innerHTML = '';
-  resCount.textContent = '';
-
-  const fd = new FormData();
-  fd.append('recto', blob, 'recto.jpg');
+// ======= SCAN ARRIÈRE-PLAN (batch) =======
+async function scanEnArrierePlan(idx){
+  const server=getServer();
+  if(!server) return;
+  const item=batchItems[idx];
+  const fd=new FormData();
+  fd.append('recto',item.blob,'recto.jpg');
 
   try{
-    const rep = await fetch(server+'/api/scan-stream', {method:'POST', body:fd});
-    if(!rep.ok) throw new Error('Erreur serveur '+rep.status);
-
-    const reader = rep.body.getReader();
-    const dec = new TextDecoder();
-    let buf = '';
-
+    const rep=await fetch(server+'/api/scan-stream',{method:'POST',body:fd});
+    if(!rep.ok) throw new Error('Erreur '+rep.status);
+    const reader=rep.body.getReader();
+    const dec=new TextDecoder();
+    let buf='';
     while(true){
-      const {value,done} = await reader.read();
+      const {value,done}=await reader.read();
       if(done) break;
-      buf += dec.decode(value,{stream:true});
-      const blocs = buf.split('\n\n');
-      buf = blocs.pop();
+      buf+=dec.decode(value,{stream:true});
+      const blocs=buf.split('\n\n'); buf=blocs.pop();
       for(const bloc of blocs){
-        const em = bloc.match(/^event: (.+)$/m);
-        const dm = bloc.match(/^data: (.+)$/m);
+        const em=bloc.match(/^event: (.+)$/m);
+        const dm=bloc.match(/^data: (.+)$/m);
         if(!em||!dm) continue;
         const evt=em[1].trim();
         let d; try{d=JSON.parse(dm[1])}catch{continue}
-
-        if(evt==='scan'){
-          if(d.erreur){ showToast(d.erreur); resetUI(); return; }
-          renderCard(d, photoUrl, resContent);
-          showResults();
-          procMsg.textContent='Chargement des prix…';
-          proc.classList.add('on');
-        } else if(evt==='prices'){
-          renderPrix(d, document.getElementById('zone-prix-0'));
-          proc.classList.remove('on');
-        } else if(evt==='ebay'){
-          renderEbay(d, document.getElementById('s-prix-0'));
-        } else if(evt==='error'){
-          showToast(d.erreur||'Erreur inconnue'); resetUI();
-        } else if(evt==='done'){
-          proc.classList.remove('on'); resetUI(false);
-        }
+        if(evt==='scan'){ item.scan=d.erreur?null:d; if(d.erreur) item.status='error'; }
+        else if(evt==='prices'){ item.prices=d; }
+        else if(evt==='ebay'){ item.ebay=d; }
+        else if(evt==='done'){ item.status=item.scan?'done':'error'; updateThumbStatus(idx); refreshBatchCardIfVisible(idx); }
+        else if(evt==='error'){ item.status='error'; item.scan=null; updateThumbStatus(idx); refreshBatchCardIfVisible(idx); }
       }
     }
-  } catch(e){
-    showToast('Serveur injoignable — vérifie l\'URL dans ⚙️');
-    resetUI();
+  }catch(e){
+    batchItems[idx].status='error';
+    updateThumbStatus(idx);
+    refreshBatchCardIfVisible(idx);
   }
 }
 
-// ---- Batch scan (cartes en séquence) ----
-async function lancerBatch(){
-  if(batchQueue.length === 0) return;
-  const server = getServer();
-  if(!server){ showSettings(); return; }
+// ======= BATCH RÉSULTATS =======
+function ouvrirBatchResults(){
+  if(batchItems.length===0) return;
+  batchCurrentIdx=0;
+  batchSelections=batchItems.map(()=>null);
+  showBatch();
+  afficherCarteBatch(0);
+}
 
-  const items = [...batchQueue];
-  const total = items.length;
+function afficherCarteBatch(idx){
+  const total=batchItems.length;
+  batchCurrentIdx=idx;
+  // Barre de progression
+  batchProgBar.style.width=((idx)/total*100)+'%';
+  batchProgTxt.textContent=`Carte ${idx+1} / ${total}`;
+  // Bouton next
+  document.getElementById('btn-next').textContent = idx===total-1 ? 'Voir le récap ✓' : 'Suivant →';
 
-  // Préparer la vue résultats
-  resContent.innerHTML = '';
-  resCount.textContent = `0 / ${total}`;
-  showResults();
-  proc.classList.add('on');
-  procMsg.textContent = `Carte 1 / ${total}…`;
+  const item=batchItems[idx];
+  batchCardC.innerHTML='';
 
-  // Conteneurs pré-créés pour chaque carte
-  const containers = items.map((_, i)=>{
-    const sep = document.createElement('div');
-    sep.className = 'batch-sep';
-    sep.innerHTML = `<div class="batch-sep-line"></div>
-      <span class="batch-sep-txt"><span class="batch-num">${i+1}</span>Carte ${i+1}</span>
-      <div class="batch-sep-line"></div>`;
-
-    const zone = document.createElement('div');
-    zone.id = `batch-zone-${i}`;
-    zone.innerHTML = `<div class="section" style="opacity:.4;text-align:center;padding:20px"><div class="loading-prix">En attente…</div></div>`;
-
-    if(i > 0) resContent.appendChild(sep);
-    resContent.appendChild(zone);
-    return zone;
-  });
-
-  // Scanner chaque carte en séquence (le serveur ne supporte qu'1 à la fois avec le verrou CM)
-  let done = 0;
-  for(let i=0; i<items.length; i++){
-    const {blob, url} = items[i];
-    const zone = containers[i];
-    zone.innerHTML = '';
-    procMsg.textContent = `Carte ${i+1} / ${total}…`;
-
-    await new Promise(resolve=>{
-      const fd = new FormData();
-      fd.append('recto', blob, 'recto.jpg');
-
-      fetch(server+'/api/scan-stream', {method:'POST', body:fd})
-        .then(rep=>{ if(!rep.ok) throw new Error('Erreur '+rep.status); return rep; })
-        .then(rep=>{
-          const reader = rep.body.getReader();
-          const dec = new TextDecoder();
-          let buf='';
-          let cardRendered = false;
-
-          async function pump(){
-            while(true){
-              const {value,done2} = await reader.read().then(r=>({value:r.value,done2:r.done}));
-              if(done2) break;
-              buf += dec.decode(value,{stream:true});
-              const blocs = buf.split('\n\n');
-              buf = blocs.pop();
-              for(const bloc of blocs){
-                const em=bloc.match(/^event: (.+)$/m);
-                const dm=bloc.match(/^data: (.+)$/m);
-                if(!em||!dm) continue;
-                const evt=em[1].trim();
-                let d; try{d=JSON.parse(dm[1])}catch{continue}
-
-                if(evt==='scan'){
-                  if(d.erreur){
-                    zone.innerHTML=`<div class="section"><div class="loading-prix">⚠ ${esc(d.erreur)}</div></div>`;
-                  } else {
-                    zone.innerHTML='';
-                    renderCard(d, url, zone, i);
-                    cardRendered=true;
-                  }
-                } else if(evt==='prices'){
-                  renderPrix(d, document.getElementById(`zone-prix-${i}`));
-                } else if(evt==='ebay'){
-                  renderEbay(d, document.getElementById(`s-prix-${i}`));
-                } else if(evt==='done'||evt==='error'){
-                  done++;
-                  resCount.textContent=`${done} / ${total}`;
-                  resolve();
-                  return;
-                }
-              }
-            }
-            resolve();
-          }
-          pump();
-        })
-        .catch(e=>{
-          zone.innerHTML=`<div class="section"><div class="loading-prix">⚠ ${esc(e.message)}</div></div>`;
-          done++; resCount.textContent=`${done} / ${total}`;
-          resolve();
-        });
-    });
+  // Photo + infos scan
+  if(item.status==='scanning'){
+    // Pas encore fini — afficher un loader mais mettre à jour automatiquement
+    batchCardC.innerHTML=`
+      <div style="text-align:center;padding:40px 20px">
+        <div class="spinner" style="margin:0 auto 14px"></div>
+        <div style="color:var(--dim);font-size:.8rem">Analyse en cours…</div>
+      </div>
+    `;
+    // Recheck toutes les 600ms
+    const check=setInterval(()=>{
+      if(batchCurrentIdx!==idx){ clearInterval(check); return; }
+      if(item.status!=='scanning'){ clearInterval(check); afficherCarteBatch(idx); }
+    },600);
+    return;
   }
 
-  proc.classList.remove('on');
-  resCount.textContent = `${total} carte${total>1?'s':''} ✓`;
-  clearBatch();
-  setBatchMode(false);
-}
+  if(!item.scan){
+    batchCardC.innerHTML=`<div class="section"><div class="loading-prix">⚠ Identification échouée</div></div>`;
+    return;
+  }
 
-function resetUI(full=true){
-  btnShut.classList.remove('scanning');
-  frame.classList.remove('scanning');
-  if(full) proc.classList.remove('on');
-}
-
-// ---- Rendu ----
-function renderCard(d, photoUrl, container, idx=0){
+  const d=item.scan;
   const conf=typeof d.confiance==='number'?d.confiance:null;
   const cls=conf==null?'':conf>=85?'conf-high':conf>=60?'conf-med':'conf-low';
   const pills=[
@@ -805,7 +675,223 @@ function renderCard(d, photoUrl, container, idx=0){
   ].filter(Boolean).map(t=>`<span class="pill">${t}</span>`).join('');
   const gradeHtml=d.gradation_visible?`<span class="pill pill-grade">${esc(d.gradation_visible)}</span>`:'';
 
-  container.innerHTML=`
+  // Prix sélectionné actuel
+  const sel=batchSelections[idx];
+
+  let prixHtml='<div class="loading-prix">Prix en cours de chargement…</div>';
+  let selDisplayHtml='';
+
+  if(item.prices){
+    const cm=item.prices;
+    if(cm.erreur){
+      prixHtml=`<div class="loading-prix">⚠ ${esc(cm.erreur)}</div>`;
+    } else {
+      const prix=cm.prix_par_etat||{};
+      const linkHtml=cm.url_produit?`<a class="link-ext" href="${esc(cm.url_produit)}" target="_blank">Voir →</a>`:'';
+      selDisplayHtml=`<div class="selected-price-display ${sel?'on':''}" id="sel-display">${sel?`✓ ${sel.condition} sélectionné — ${sel.price.toFixed(2)}€`:''}</div>`;
+      prixHtml=`
+        <div class="section-title"><span>Cardmarket — sélectionne un prix</span>${linkHtml}</div>
+        ${selDisplayHtml}
+        <div class="prix-grid-sel" id="prix-sel-grid">
+          ${ETATS.map(e=>{
+            const v=prix[e];
+            const isSel=sel&&sel.condition===e;
+            const naClass=v==null?'na-cell':'';
+            const selClass=isSel?'selected':'';
+            return `<div class="prix-cell-sel etat-${e} ${naClass} ${selClass}" data-cond="${e}" data-val="${v!=null?v:''}">
+              <div class="prix-code">${e}</div>
+              ${v!=null?`<div class="prix-val">${v.toFixed(2)}€</div>`:`<div class="prix-val na">—</div>`}
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="sel-hint">Appuie sur un état pour sélectionner le prix de rachat</div>
+      `;
+    }
+  }
+
+  batchCardC.innerHTML=`
+    <div style="padding:0 0 120px">
+      <div class="card-hero">
+        <img src="${esc(item.url)}" alt="Carte"/>
+        <div class="card-hero-info">
+          <div class="card-name">${esc(d.nom_carte_langue_originale||'Inconnu')}</div>
+          ${d.nom_carte_anglais?`<div class="card-name-en">${esc(d.nom_carte_anglais)}</div>`:''}
+          ${conf!=null?`<span class="conf-badge ${cls}">Confiance ${conf}%</span>`:''}
+          <div class="pills">${pills}${gradeHtml}</div>
+        </div>
+      </div>
+      <div class="section" id="batch-prix-section">${prixHtml}</div>
+      ${item.ebay&&item.ebay.ventes?.length?renderEbayInline(item.ebay):''}
+    </div>
+  `;
+
+  // Attacher événements sélection prix
+  const grid=document.getElementById('prix-sel-grid');
+  if(grid){
+    grid.addEventListener('click',e=>{
+      const cell=e.target.closest('.prix-cell-sel');
+      if(!cell||cell.classList.contains('na-cell')) return;
+      const cond=cell.dataset.cond;
+      const val=parseFloat(cell.dataset.val);
+      if(isNaN(val)) return;
+      batchSelections[idx]={condition:cond,price:val};
+      // Mise à jour visuelle
+      grid.querySelectorAll('.prix-cell-sel').forEach(c=>c.classList.remove('selected'));
+      cell.classList.add('selected');
+      const disp=document.getElementById('sel-display');
+      if(disp){ disp.className='selected-price-display on'; disp.textContent=`✓ ${cond} sélectionné — ${val.toFixed(2)}€`; }
+    });
+  }
+}
+
+function refreshBatchCardIfVisible(idx){
+  if(vueBatch.classList.contains('on')&&batchCurrentIdx===idx){
+    afficherCarteBatch(idx);
+  }
+}
+
+function renderEbayInline(eb){
+  if(!eb||eb.erreur||!eb.ventes?.length) return '';
+  const dev=eb.devise||'';
+  return `<div class="section">
+    <div class="section-title"><span>Ventes eBay</span>${eb.url_recherche?`<a class="link-ext" href="${esc(eb.url_recherche)}" target="_blank">Voir →</a>`:''}</div>
+    <div class="ebay-stats">
+      ${eb.mediane!=null?`<div class="ebay-stat"><div class="lbl">Médiane</div><div class="val">${eb.mediane.toFixed(2)} ${dev}</div></div>`:''}
+      ${eb.moyenne!=null?`<div class="ebay-stat"><div class="lbl">Moyenne</div><div class="val">${eb.moyenne.toFixed(2)} ${dev}</div></div>`:''}
+      ${eb.nb_ventes?`<div class="ebay-stat"><div class="lbl">Ventes</div><div class="val">${eb.nb_ventes}</div></div>`:''}
+    </div>
+    <ul class="sale-list">${eb.ventes.slice(0,5).map(v=>`
+      <li class="sale">
+        <span class="sale-price">${v.prix.toFixed(2)} ${esc(v.devise||dev)}</span>
+        <span class="sale-title">${v.url?`<a href="${esc(v.url)}" target="_blank">${esc(v.titre)}</a>`:esc(v.titre)}</span>
+      </li>`).join('')}
+    </ul>
+  </div>`;
+}
+
+// Navigation suivant/passer
+document.getElementById('btn-next').addEventListener('click',()=>{
+  const total=batchItems.length;
+  if(batchCurrentIdx<total-1){
+    afficherCarteBatch(batchCurrentIdx+1);
+    document.getElementById('batch-scroll').scrollTop=0;
+  } else {
+    afficherRecap();
+  }
+});
+document.getElementById('btn-skip').addEventListener('click',()=>{
+  batchSelections[batchCurrentIdx]=null; // pas de prix
+  const total=batchItems.length;
+  if(batchCurrentIdx<total-1){
+    afficherCarteBatch(batchCurrentIdx+1);
+    document.getElementById('batch-scroll').scrollTop=0;
+  } else {
+    afficherRecap();
+  }
+});
+
+// ======= RÉCAP =======
+function afficherRecap(){
+  showRecap();
+  batchProgBar.style.width='100%';
+
+  const items=batchItems;
+  const sels=batchSelections;
+  let total=0;
+  let countPriced=0;
+
+  let rowsHtml='';
+  items.forEach((item,i)=>{
+    const sel=sels[i];
+    const name=item.scan?(item.scan.nom_carte_langue_originale||'Inconnu'):'Échec scan';
+    if(sel){ total+=sel.price; countPriced++; }
+    rowsHtml+=`
+      <div class="recap-row">
+        <img class="recap-thumb" src="${esc(item.url)}" alt=""/>
+        <div class="recap-info">
+          <div class="recap-name">${esc(name)}</div>
+          <div class="recap-etat">${sel?sel.condition:'—'}</div>
+        </div>
+        ${sel
+          ?`<div class="recap-price">${sel.price.toFixed(2)}€</div>`
+          :`<div class="recap-price skipped">Ignoré</div>`
+        }
+      </div>`;
+  });
+
+  recapContent.innerHTML=`
+    <div class="recap-total">
+      <div class="recap-total-lbl">Total rachat estimé</div>
+      <div class="recap-total-val">${total.toFixed(2)}€</div>
+      <div class="recap-total-count">${countPriced} carte${countPriced>1?'s':''} pricées sur ${items.length}</div>
+    </div>
+    ${rowsHtml}
+    <button class="btn-new-scan" onclick="nouveauBatch()">📷 Nouveau lot</button>
+    <div style="height:20px"></div>
+  `;
+}
+
+function nouveauBatch(){
+  clearBatch();
+  setBatchMode(false);
+  showScan();
+}
+document.getElementById('btn-recap-back').addEventListener('click',()=>showBatch());
+
+// ======= SCAN UNIQUE =======
+async function scanSingle(blob,photoUrl){
+  const server=getServer();
+  if(!server){ showSettings(); return; }
+  btnShut.classList.add('scanning');
+  frame.classList.add('scanning');
+  proc.classList.add('on');
+  procMsg.textContent='Identification de la carte…';
+  toast.classList.remove('on');
+  resContent.innerHTML='';
+  const fd=new FormData();
+  fd.append('recto',blob,'recto.jpg');
+  try{
+    const rep=await fetch(server+'/api/scan-stream',{method:'POST',body:fd});
+    if(!rep.ok) throw new Error('Erreur serveur '+rep.status);
+    const reader=rep.body.getReader();
+    const dec=new TextDecoder();
+    let buf='';
+    while(true){
+      const {value,done}=await reader.read();
+      if(done) break;
+      buf+=dec.decode(value,{stream:true});
+      const blocs=buf.split('\n\n'); buf=blocs.pop();
+      for(const bloc of blocs){
+        const em=bloc.match(/^event: (.+)$/m);
+        const dm=bloc.match(/^data: (.+)$/m);
+        if(!em||!dm) continue;
+        const evt=em[1].trim();
+        let d; try{d=JSON.parse(dm[1])}catch{continue}
+        if(evt==='scan'){
+          if(d.erreur){ showToast(d.erreur); resetUI(); return; }
+          renderCardSimple(d,photoUrl);
+          showResults();
+          procMsg.textContent='Chargement des prix…';
+          proc.classList.add('on');
+        } else if(evt==='prices'){
+          renderPrixSimple(d);
+          proc.classList.remove('on');
+        } else if(evt==='ebay'){
+          const sp=document.getElementById('s-prix-simple');
+          if(sp) sp.insertAdjacentHTML('afterend',renderEbayInline(d));
+        } else if(evt==='error'){ showToast(d.erreur||'Erreur'); resetUI(); }
+        else if(evt==='done'){ proc.classList.remove('on'); resetUI(false); }
+      }
+    }
+  }catch(e){ showToast('Serveur injoignable — vérifie l\'URL dans ⚙️'); resetUI(); }
+}
+
+function renderCardSimple(d,photoUrl){
+  const conf=typeof d.confiance==='number'?d.confiance:null;
+  const cls=conf==null?'':conf>=85?'conf-high':conf>=60?'conf-med':'conf-low';
+  const pills=[d.numero&&`N° ${esc(d.numero)}`,d.langue_detectee&&esc(d.langue_detectee.toUpperCase()),d.set_visible&&esc(d.set_visible)].filter(Boolean).map(t=>`<span class="pill">${t}</span>`).join('');
+  const gradeHtml=d.gradation_visible?`<span class="pill pill-grade">${esc(d.gradation_visible)}</span>`:'';
+  resContent.innerHTML=`
     <div class="card-hero">
       <img src="${esc(photoUrl)}" alt="Carte"/>
       <div class="card-hero-info">
@@ -813,70 +899,42 @@ function renderCard(d, photoUrl, container, idx=0){
         ${d.nom_carte_anglais?`<div class="card-name-en">${esc(d.nom_carte_anglais)}</div>`:''}
         ${conf!=null?`<span class="conf-badge ${cls}">Confiance ${conf}%</span>`:''}
         <div class="pills">${pills}${gradeHtml}</div>
-        ${d.remarques_etat?`<div class="etat-note">⚠ ${esc(d.remarques_etat)}</div>`:''}
+        ${d.remarques_etat?`<div style="font-size:.78rem;color:var(--orange);margin-top:8px">⚠ ${esc(d.remarques_etat)}</div>`:''}
       </div>
     </div>
-    <div class="section" id="s-prix-${idx}">
-      <div class="section-title">
-        <span>Cardmarket</span>
-        <a class="link-ext" id="lien-cm-${idx}" href="#" target="_blank" style="display:none">Voir →</a>
-      </div>
-      <div id="zone-prix-${idx}"><div class="loading-prix">Chargement…</div></div>
+    <div class="section" id="s-prix-simple">
+      <div class="section-title"><span>Cardmarket</span><a class="link-ext" id="lien-cm" href="#" target="_blank" style="display:none">Voir →</a></div>
+      <div id="zone-prix"><div class="loading-prix">Chargement…</div></div>
     </div>
+    <button class="btn-new-scan" onclick="showScan()" style="margin-top:12px">📷 Nouveau scan</button>
   `;
-
-  // Bouton nouveau scan seulement sur la dernière (mode solo)
-  if(idx===0 && !batchMode){
-    const btn=document.createElement('button');
-    btn.className='btn-new-scan';
-    btn.textContent='📷 Nouveau scan';
-    btn.onclick=showScan;
-    container.appendChild(btn);
-  }
 }
 
-function renderPrix(cm, zone){
-  if(!zone) return;
-  const lIdx=zone.id.replace('zone-prix-','');
-  const l=document.getElementById('lien-cm-'+lIdx);
-  if(cm.erreur){ zone.innerHTML=`<div class="loading-prix">⚠ ${esc(cm.erreur)}</div>`; return; }
+function renderPrixSimple(cm){
+  const z=document.getElementById('zone-prix');
+  const l=document.getElementById('lien-cm');
+  if(!z) return;
+  if(cm.erreur){ z.innerHTML=`<div class="loading-prix">⚠ ${esc(cm.erreur)}</div>`; return; }
   if(cm.url_produit&&l){ l.href=cm.url_produit; l.style.display=''; }
   const prix=cm.prix_par_etat||{};
-  zone.innerHTML=`<div class="prix-grid">${ETATS.map(e=>{
+  z.innerHTML=`<div class="prix-grid">${ETATS.map(e=>{
     const v=prix[e];
     return `<div class="prix-cell etat-${e}"><div class="prix-code">${e}</div>${v!=null?`<div class="prix-val">${v.toFixed(2)}€</div>`:`<div class="prix-val na">—</div>`}</div>`;
   }).join('')}</div>`;
 }
 
-function renderEbay(eb, after){
-  if(!eb||eb.erreur||!eb.ventes?.length||!after) return;
-  const dev=eb.devise||'';
-  const html=`<div class="section">
-    <div class="section-title">
-      <span>Ventes eBay</span>
-      ${eb.url_recherche?`<a class="link-ext" href="${esc(eb.url_recherche)}" target="_blank">Voir →</a>`:''}
-    </div>
-    <div class="ebay-stats">
-      ${eb.mediane!=null?`<div class="ebay-stat"><div class="lbl">Médiane</div><div class="val">${eb.mediane.toFixed(2)} ${dev}</div></div>`:''}
-      ${eb.moyenne!=null?`<div class="ebay-stat"><div class="lbl">Moyenne</div><div class="val">${eb.moyenne.toFixed(2)} ${dev}</div></div>`:''}
-      ${eb.nb_ventes?`<div class="ebay-stat"><div class="lbl">Ventes</div><div class="val">${eb.nb_ventes}</div></div>`:''}
-    </div>
-    <ul class="sale-list">${eb.ventes.slice(0,8).map(v=>`
-      <li class="sale">
-        <span class="sale-price">${v.prix.toFixed(2)} ${esc(v.devise||dev)}</span>
-        <span class="sale-title">${v.url?`<a href="${esc(v.url)}" target="_blank">${esc(v.titre)}</a>`:esc(v.titre)}</span>
-        ${v.date?`<span class="sale-date">${esc(v.date)}</span>`:''}
-      </li>`).join('')}
-    </ul>
-  </div>`;
-  after.insertAdjacentHTML('afterend', html);
+function resetUI(full=true){
+  btnShut.classList.remove('scanning');
+  frame.classList.remove('scanning');
+  if(full) proc.classList.remove('on');
 }
 
+// ======= UTILS =======
 function showToast(msg){ toast.textContent=msg; toast.classList.add('on'); setTimeout(()=>toast.classList.remove('on'),4000); }
 function esc(s){ if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-// ---- Init ----
-if(!getServer()) setTimeout(showSettings, 500);
+// ======= INIT =======
+if(!getServer()) setTimeout(showSettings,500);
 startCamera();
 </script>
 <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
