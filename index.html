@@ -603,6 +603,10 @@ async function _processBatchQueue(){
   while(_batchQueue.length > 0){
     const idx = _batchQueue.shift();
     await _scanOne(idx);
+    // Pause entre chaque carte pour ne pas saturer Cardmarket
+    if(_batchQueue.length > 0){
+      await new Promise(r => setTimeout(r, 3000));
+    }
   }
   _batchRunning = false;
 }
